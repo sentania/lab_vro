@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ns2:workflow xmlns:ns2="http://vmware.com/vco/workflow" root-name="item5" object-name="workflow:name=generic" id="90643f14-1ed9-402e-b57e-3d3e4d397a7b" editor-version="1.6" version="1.0.0" api-version="6.0.0" allowed-operations="vfe" restartMode="1" resumeFromFailedMode="0">
+<ns2:workflow xmlns:ns2="http://vmware.com/vco/workflow" root-name="item6" object-name="workflow:name=generic" id="90643f14-1ed9-402e-b57e-3d3e4d397a7b" editor-version="1.6" version="1.0.0" api-version="6.0.0" allowed-operations="vfe" restartMode="1" resumeFromFailedMode="0">
     <display-name>Add tag to VC vm</display-name>
     <position y="45.5" x="100.0"/>
     <input>
@@ -25,7 +25,7 @@
     <workflow-item name="item0" type="end" end-mode="0" comparator="0">
         <in-binding/>
         <out-binding/>
-        <position y="45.40909090909091" x="844.5"/>
+        <position y="45.37417436824218" x="899.9998416790413"/>
     </workflow-item>
     <workflow-item name="item1" out-name="item3" alt-out-name="item2" type="condition" comparator="0">
         <display-name>Create Tag Category</display-name>
@@ -36,7 +36,7 @@ return (newTagCategory === true);</script>
         </in-binding>
         <out-binding/>
         <condition name="newTagCategory" type="boolean" comparator="0" label="null">false</condition>
-        <position y="45.40909090909091" x="344.5"/>
+        <position y="45.37417436824218" x="399.99984167904125"/>
     </workflow-item>
     <workflow-item name="item2" out-name="item4" type="link" linked-workflow-id="0e9c72af-5c3d-4207-9164-9af35fc78caa" comparator="0">
         <display-name>Create vSphere tag</display-name>
@@ -49,7 +49,7 @@ return (newTagCategory === true);</script>
         <out-binding>
             <bind name="tagId" type="string" export-name="tagId"/>
         </out-binding>
-        <position y="55.40909090909091" x="484.5"/>
+        <position y="55.37417436824218" x="539.9998416790413"/>
     </workflow-item>
     <workflow-item name="item3" out-name="item2" type="link" linked-workflow-id="986294a3-0e8d-4c12-ab87-89e8260edaad" comparator="0">
         <display-name>Create vSphere Tag Category</display-name>
@@ -60,7 +60,7 @@ return (newTagCategory === true);</script>
         <out-binding>
             <bind name="tagCategoryId" type="string" export-name="tagCategoryId"/>
         </out-binding>
-        <position y="128.0" x="342.0"/>
+        <position y="127.96508345915129" x="397.49984167904125"/>
     </workflow-item>
     <workflow-item name="item4" out-name="item0" type="link" linked-workflow-id="3bdcee06-b111-4b23-94aa-1fa11376f5c0" comparator="0">
         <display-name>Associate vSphere tag to VM</display-name>
@@ -70,7 +70,7 @@ return (newTagCategory === true);</script>
             <bind name="vapiEndpoint" type="VAPI:VAPIEndpoint" export-name="vapiEndpoint"/>
         </in-binding>
         <out-binding/>
-        <position y="55.40909090909091" x="664.5"/>
+        <position y="55.37417436824218" x="719.9998416790413"/>
     </workflow-item>
     <workflow-item name="item5" out-name="item1" type="task" comparator="0">
         <display-name>Init</display-name>
@@ -109,7 +109,27 @@ if (!newTagCategory){
             <bind name="vapiEndpoint" type="VAPI:VAPIEndpoint" export-name="vapiEndpoint"/>
             <bind name="tagCategoryId" type="string" export-name="tagCategoryId"/>
         </out-binding>
-        <position y="55.40909090909091" x="204.5"/>
+        <position y="55.37417436824218" x="259.99984167904125"/>
+    </workflow-item>
+    <workflow-item name="item6" out-name="item5" type="task" comparator="0">
+        <display-name>Scriptable task</display-name>
+        <script encoded="false">var myVC = vCenterVm.sdkConnection.name&#13;
+System.log(myVC)&#13;
+var endpointURL = myVC.replace("sdk", "api")&#13;
+var endpointURL = endpointURL.replace(":443", "")&#13;
+System.log(endpointURL)&#13;
+var myVAPI = VAPIManager.findEndpoint(endpointURL)&#13;
+var vapiEndpoint = myVAPI.name&#13;
+System.log("Target VAPI Endpoint is: " + vapiEndpoint)&#13;
+</script>
+        <in-binding>
+            <bind name="vCenterVm" type="VC:VirtualMachine" export-name="vCenterVm"/>
+        </in-binding>
+        <out-binding>
+            <bind name="vapiEndpoint" type="VAPI:VAPIEndpoint" export-name="vapiEndpoint"/>
+        </out-binding>
+        <description>Simple task with custom script capability.</description>
+        <position y="49.98254172957564" x="167.74992083952063"/>
     </workflow-item>
     <presentation>
         <p-group>
