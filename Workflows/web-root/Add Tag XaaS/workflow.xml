@@ -1,0 +1,72 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item2" object-name="workflow:name=generic" id="c30ae28c-321c-4132-b015-f4a31add93d1" version="1.0.0" api-version="6.0.0" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Add Tag XaaS]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <input>
+    <param name="vcVM" type="VC:VirtualMachine"/>
+  </input>
+  <attrib name="vapiendpoint" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="newTagCategory" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[false]]></value>
+  </attrib>
+  <attrib name="tagCategory" type="string" read-only="false">
+    <value encoded="n"><![CDATA[monitoringException]]></value>
+  </attrib>
+  <attrib name="tagCategoryName" type="string" read-only="false">
+    <value encoded="n"><![CDATA[monitoringException]]></value>
+  </attrib>
+  <attrib name="tagName" type="string" read-only="false">
+    <value encoded="n"><![CDATA[snapShotLifetime]]></value>
+  </attrib>
+  <attrib name="tagDescription" type="string" read-only="false">
+    <value encoded="n"><![CDATA[Exceptions to the 72 Hour snapshot Policy]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="440.0"/>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item3" type="task">
+    <display-name><![CDATA[Locate which vCenter]]></display-name>
+    <script encoded="false"><![CDATA[var myVC = vcVM.sdkConnection.name
+System.log(myVC)
+var endpointURL = myVC.replace("sdk", "api")
+var endpointURL = endpointURL.replace(":443", "")
+System.log(endpointURL)
+var myVAPI = VAPIManager.findEndpoint(endpointURL)
+var vapiendpoint = myVAPI.name
+System.log("Target VAPI Endpoint is: " + vapiendpoint)
+]]></script>
+    <in-binding>
+      <bind name="vcVM" type="VC:VirtualMachine" export-name="vcVM"/>
+    </in-binding>
+    <out-binding>
+      <bind name="vapiendpoint" type="string" export-name="vapiendpoint"/>
+    </out-binding>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="60.0" x="200.0"/>
+  </workflow-item>
+  <workflow-item name="item3" out-name="item0" type="multiple">
+    <display-name><![CDATA[Nested workflows]]></display-name>
+    <in-binding/>
+    <out-binding/>
+    <workflow-subelements-list>
+      <workflow-subelement name="item0" linked-workflow-id="90643f14-1ed9-402e-b57e-3d3e4d397a7b">
+        <display-name><![CDATA[Add tag to VC vm]]></display-name>
+        <in-binding>
+          <bind name="vCenterVm" type="VC:VirtualMachine" export-name="vcVM"/>
+          <bind name="endpoint" type="string" export-name="vapiendpoint"/>
+          <bind name="newTagCategory" type="boolean" export-name="newTagCategory"/>
+          <bind name="tagCategory" type="string" export-name="tagCategory"/>
+          <bind name="tagCategoryName" type="string" export-name="tagCategoryName"/>
+          <bind name="tagName" type="string" export-name="tagName"/>
+          <bind name="tagDescription" type="string" export-name="tagDescription"/>
+        </in-binding>
+        <out-binding/>
+      </workflow-subelement>
+    </workflow-subelements-list>
+    <position y="60.0" x="305.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>
