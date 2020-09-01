@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ns2:workflow xmlns:ns2="http://vmware.com/vco/workflow" root-name="item1" object-name="workflow:name=generic" id="af157dd7-5b50-440c-a0e0-f7bdb74134ae" editor-version="2.0" version="0.0.1" api-version="6.0.0" restartMode="1" resumeFromFailedMode="0">
+<ns2:workflow xmlns:ns2="http://vmware.com/vco/workflow" root-name="item1" object-name="workflow:name=generic" id="af157dd7-5b50-440c-a0e0-f7bdb74134ae" editor-version="2.0" version="0.0.2" api-version="6.0.0" restartMode="1" resumeFromFailedMode="0">
     <display-name>Machine Allocated</display-name>
     <position y="50.0" x="100.0"/>
     <input>
@@ -7,7 +7,7 @@
     </input>
     <output/>
     <attrib name="customProps" type="string">
-        <value encoded="n"/>
+        <value encoded="n"></value>
     </attrib>
     <workflow-item name="item0" type="end" end-mode="0" comparator="0">
         <in-binding/>
@@ -39,7 +39,9 @@
 &#13;
    var customProps = inputProperties.get("customProperties")&#13;
    </script>
-        <in-binding/>
+        <in-binding>
+            <bind name="inputProperties" type="Properties" export-name="inputProperties"/>
+        </in-binding>
         <out-binding/>
         <description>Simple task with custom script capability.</description>
         <position y="60.0" x="164.0"/>
