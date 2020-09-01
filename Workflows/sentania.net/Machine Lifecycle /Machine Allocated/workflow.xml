@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ns2:workflow xmlns:ns2="http://vmware.com/vco/workflow" root-name="item1" object-name="workflow:name=generic" id="af157dd7-5b50-440c-a0e0-f7bdb74134ae" editor-version="2.0" version="0.0.2" api-version="6.0.0" restartMode="1" resumeFromFailedMode="0">
+<ns2:workflow xmlns:ns2="http://vmware.com/vco/workflow" root-name="item1" object-name="workflow:name=generic" id="af157dd7-5b50-440c-a0e0-f7bdb74134ae" editor-version="2.0" version="0.0.3" api-version="6.0.0" restartMode="1" resumeFromFailedMode="0">
     <display-name>Machine Allocated</display-name>
     <position y="50.0" x="100.0"/>
     <input>
@@ -26,7 +26,7 @@
                  var key = keys[k];&#13;
                  var value = props.get(keys[k])&#13;
                  if ("Properties" == System.getObjectType(value)){&#13;
-                  System.log(Prefix + key + "[")&#13;
+                  System.log(prefix + key + "[")&#13;
                   dumpProperties(value,(lvl+2));&#13;
                   System.log(prefix+ "]")&#13;
                  } else{&#13;
