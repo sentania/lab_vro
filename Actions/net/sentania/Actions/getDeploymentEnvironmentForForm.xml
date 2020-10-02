@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<dunes-script-module name="getDeploymentEnvironmentForForm" result-type="Array/string" api-version="6.0.0" id="205ae051-2b54-46c8-aff1-bdd5fe762c7e" version="0.0.0" category-name="net.sentania.Actions">
+<dunes-script-module name="getDeploymentEnvironmentForForm" result-type="Array/string" api-version="6.0.0" id="205ae051-2b54-46c8-aff1-bdd5fe762c7e" version="0.0.2" category-name="net.sentania.Actions">
+  <param n="fileName" t="string"><![CDATA[Which list file to select]]></param>
   <script encoded="false"><![CDATA[// Returns a collection of REST:RESTHost object types from the inventory service plugin
 var restHost = RESTHostManager.getHost('c3d0242f-64db-44c2-9492-75558ca505ee')
 var restOperation = restHost.getOperation('c3d0242f-64db-44c2-9492-75558ca505ee:8a2248ff-8959-4cf0-9517-57712094d2e2')
-var request = restOperation.createRequest();
+var request = restOperation.createRequest([fileName]);
 
-var request = restOperation.createRequest();
 //set the request content type
 request.contentType = "application\/json";
 
