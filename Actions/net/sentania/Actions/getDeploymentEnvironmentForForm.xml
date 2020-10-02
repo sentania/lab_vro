@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getDeploymentEnvironmentForForm" result-type="Array/string" api-version="6.0.0" id="205ae051-2b54-46c8-aff1-bdd5fe762c7e" version="0.0.0" category-name="net.sentania.Actions">
+  <script encoded="false"><![CDATA[// Returns a collection of REST:RESTHost object types from the inventory service plugin
+var restHost = RESTHostManager.getHost('c3d0242f-64db-44c2-9492-75558ca505ee')
+var restOperation = restHost.getOperation('c3d0242f-64db-44c2-9492-75558ca505ee:8a2248ff-8959-4cf0-9517-57712094d2e2')
+var request = restOperation.createRequest();
+
+var request = restOperation.createRequest();
+//set the request content type
+request.contentType = "application\/json";
+
+//Customize the request here
+request.setHeader("accept", "application/vnd.github.VERSION.raw");
+var response = request.execute();
+//prepare output parameters
+
+statusCode = response.statusCode;
+statusCodeAttribute = statusCode;
+
+contentLength = response.contentLength;
+headers = response.getAllHeaders();
+contentAsString = response.contentAsString;
+var outputarray = [];
+
+var contentArray = contentAsString.split("\n");
+for (index = 0; index < contentArray.length; ++index)
+{
+ 	var friendlyName = contentArray[index].split(',')[0];
+	if (friendlyName != '')
+	{
+		outputarray.push(friendlyName);
+	}
+}
+return outputarray
+
+]]></script>
+</dunes-script-module>
