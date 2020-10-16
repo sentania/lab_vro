@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getVMDiskNames" result-type="Array/string" api-version="6.0.0" id="9554e00e-c9bd-4664-b1b1-abd2a74e1aa0" version="0.2.0" category-name="net.sentania.Actions">
+  <param n="vm" t="VC:VirtualMachine"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[var devices = vm.config.hardware.device;
+var disks = new Array();
+
+for (i in devices){
+    if (devices[i].DeviceInfo.Label.indexOf('Hard disk') >= 0){
+        if (devices[i].DeviceInfo.Label != "Hard disk 1"){
+            var capacityGB = devices[i].capacityInKB / 1024 / 1024;
+            var description = devices[i].deviceInfo.label + "-" + capacityGB + " GB";
+            disks.push(description);
+        }
+    } 
+}
+return disks;]]></script>
+</dunes-script-module>

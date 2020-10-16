@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<package>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='af157dd7-5b50-440c-a0e0-f7bdb74134ae'&dunesName='Workflow']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='90643f14-1ed9-402e-b57e-3d3e4d397a7b'&dunesName='Workflow']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='0e9c72af-5c3d-4207-9164-9af35fc78caa'&dunesName='Workflow']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='986294a3-0e8d-4c12-ab87-89e8260edaad'&dunesName='Workflow']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='3bdcee06-b111-4b23-94aa-1fa11376f5c0'&dunesName='Workflow']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='90803051-0147-48c9-99d4-35b421610e9b'&dunesName='Workflow']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='BD80808080808080808080808080808053C180800122528313869552e41805bb1'&dunesName='Workflow']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='8efc8297-a1ab-4734-9f1a-c38e715a0f0d'&dunesName='Action'&name='createSnapshot'&category='com.vmware.library.vc.vm.snapshot']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='99afccd7-9fcc-4dc2-82b7-586de690364e'&dunesName='Action'&name='vim3WaitTaskEnd'&category='com.vmware.library.vc.basic']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='4b358a7f-ad9e-4204-8560-06b5efcb7f4b'&dunesName='Workflow']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='b71a387e-6d6a-4fd1-897c-fbca98f0ce1b'&dunesName='Action'&name='extendVMDisk'&category='net.sentania.Actions']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='205ae051-2b54-46c8-aff1-bdd5fe762c7e'&dunesName='Action'&name='getDynamicList'&category='net.sentania.Actions']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='9554e00e-c9bd-4664-b1b1-abd2a74e1aa0'&dunesName='Action'&name='getVMDiskNames'&category='net.sentania.Actions']]></elm>
+<used-plugin name='VAPI' version='7.5.2' />
+<used-plugin name='VC' version='6.5.0' />
+</package>

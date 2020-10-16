@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<package>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='4b358a7f-ad9e-4204-8560-06b5efcb7f4b'&dunesName='Workflow']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='b71a387e-6d6a-4fd1-897c-fbca98f0ce1b'&dunesName='Action'&name='extendVMDisk'&category='net.sentania.Actions']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='99afccd7-9fcc-4dc2-82b7-586de690364e'&dunesName='Action'&name='vim3WaitTaskEnd'&category='com.vmware.library.vc.basic']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='9554e00e-c9bd-4664-b1b1-abd2a74e1aa0'&dunesName='Action'&name='getVMDiskNames'&category='net.sentania.Actions']]></elm>
+<used-plugin name='VC' version='6.5.0' />
+</package>
