@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<dunes-script-module name="extendVMDisk" result-type="VC:Task" api-version="6.0.0" id="b71a387e-6d6a-4fd1-897c-fbca98f0ce1b" version="0.2.1" category-name="net.sentania.Actions">
+<dunes-script-module name="extendVMDisk" result-type="VC:Task" api-version="6.0.0" id="b71a387e-6d6a-4fd1-897c-fbca98f0ce1b" version="0.2.2" category-name="net.sentania.Actions">
   <param n="vm" t="VC:VirtualMachine"><![CDATA[]]></param>
   <param n="diskString" t="string"><![CDATA[]]></param>
   <param n="increaseSizeGB" t="number"><![CDATA[]]></param>
@@ -15,38 +15,16 @@ for (i in devices){
 
 var newSizeKB = disk.capacityInKB + (increaseSizeGB * 1024 * 1024)
 System.log("New Size KB = " + newSizeKB)
-
 var spec = new VcVirtualMachineConfigSpec();
 spec.changeVersion = vm.config.changeVersion;
-//spec.deviceChange = System.getModule("com.vmware.onyx").array(VcVirtualDeviceConfigSpec, 1);
-spec.deviceChange = [];
-spec.deviceChange[0] = new VcVirtualDeviceConfigSpec();
-spec.deviceChange[0].operation = VcVirtualDeviceConfigSpecOperation.edit;
-spec.deviceChange[0].device = new VcVirtualDisk();
-spec.deviceChange[0].device.key = disk.key;
-spec.deviceChange[0].device.deviceInfo = new VcDescription();
-spec.deviceChange[0].device.deviceInfo.label = disk.deviceInfo.label;
-spec.deviceChange[0].device.deviceInfo.summary = disk.deviceInfo.summary;
-spec.deviceChange[0].device.backing = new VcVirtualDiskFlatVer2BackingInfo();
-spec.deviceChange[0].device.backing.fileName = disk.backing.fileName;
-spec.deviceChange[0].device.backing.diskMode = disk.backing.diskMode;
-spec.deviceChange[0].device.backing.split = disk.backing.split;
-spec.deviceChange[0].device.backing.writeThrough = disk.backing.writeThrough;
-spec.deviceChange[0].device.backing.thinProvisioned = disk.backing.thinProvisioned;
-spec.deviceChange[0].device.backing.uuid = disk.backing.uuid;
-spec.deviceChange[0].device.backing.contentId = disk.backing.contentId;
-spec.deviceChange[0].device.backing.digestEnabled = disk.backing.digestEnabled;
-spec.deviceChange[0].device.controllerKey = disk.controllerKey;
-spec.deviceChange[0].device.unitNumber = disk.unitNumber;
-spec.deviceChange[0].device.capacityInKB = newSizeKB;
-spec.deviceChange[0].device.shares = new VcSharesInfo();
-spec.deviceChange[0].device.shares.shares = disk.shares.shares;
-spec.deviceChange[0].device.shares.level = disk.shares.level;
-spec.deviceChange[0].device.storageIOAllocation = new VcStorageIOAllocationInfo();
-spec.deviceChange[0].device.storageIOAllocation.limit = disk.storageIOAllocation.limit;
-spec.deviceChange[0].device.storageIOAllocation.shares = new VcSharesInfo();
-spec.deviceChange[0].device.storageIOAllocation.shares.shares = disk.storageIOAllocation.shares.shares;
-spec.deviceChange[0].device.storageIOAllocation.shares.level = disk.storageIOAllocation.shares.level;
+var deviceChanges = new Array();
+var deviceChange = new VcVirtualDeviceConfigSpec();
+deviceChange.operation = VcVirtualDeviceConfigSpecOperation.edit;
+deviceChange.device = disk;
+deviceChange.device.capacityInKB = newSizeKB;
+deviceChanges.push(deviceChange);
+spec.deviceChange = deviceChanges
+
 
 return vm.reconfigVM_Task(spec); ]]></script>
 </dunes-script-module>
