@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<dunes-script-module name="extendVMDisk" result-type="VC:Task" api-version="6.0.0" id="b71a387e-6d6a-4fd1-897c-fbca98f0ce1b" version="0.2.0" category-name="net.sentania.Actions">
+<dunes-script-module name="extendVMDisk" result-type="VC:Task" api-version="6.0.0" id="b71a387e-6d6a-4fd1-897c-fbca98f0ce1b" version="0.2.1" category-name="net.sentania.Actions">
   <param n="vm" t="VC:VirtualMachine"><![CDATA[]]></param>
   <param n="diskString" t="string"><![CDATA[]]></param>
   <param n="increaseSizeGB" t="number"><![CDATA[]]></param>
@@ -18,7 +18,8 @@ System.log("New Size KB = " + newSizeKB)
 
 var spec = new VcVirtualMachineConfigSpec();
 spec.changeVersion = vm.config.changeVersion;
-spec.deviceChange = System.getModule("com.vmware.onyx").array(VcVirtualDeviceConfigSpec, 1);
+//spec.deviceChange = System.getModule("com.vmware.onyx").array(VcVirtualDeviceConfigSpec, 1);
+spec.deviceChange = [];
 spec.deviceChange[0] = new VcVirtualDeviceConfigSpec();
 spec.deviceChange[0].operation = VcVirtualDeviceConfigSpecOperation.edit;
 spec.deviceChange[0].device = new VcVirtualDisk();
