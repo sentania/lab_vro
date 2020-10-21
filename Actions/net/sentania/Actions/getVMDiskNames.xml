@@ -1,10 +1,15 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<dunes-script-module name="getVMDiskNames" result-type="Array/string" api-version="6.0.0" id="9554e00e-c9bd-4664-b1b1-abd2a74e1aa0" version="0.2.2" category-name="net.sentania.Actions">
+<dunes-script-module name="getVMDiskNames" result-type="Array/string" api-version="6.0.0" id="9554e00e-c9bd-4664-b1b1-abd2a74e1aa0" version="0.2.3" category-name="net.sentania.Actions">
   <param n="vm" t="VC:VirtualMachine"><![CDATA[]]></param>
   <script encoded="false"><![CDATA[if (vm == null)
 {
-var devices = vm.config.hardware.device;
-var disks = new Array();
+    var defaultmessage = "Please select a virtual machine"
+    disks.push(defaultmessage)
+}
+else
+{
+    var devices = vm.config.hardware.device;
+    var disks = new Array();
 
 for (i in devices){
     if (devices[i].DeviceInfo.Label.indexOf('Hard disk') >= 0){
@@ -16,9 +21,6 @@ for (i in devices){
     } 
 }
 }
-else
-{
-    disks.push("Please select a virtual machine")
 }
 
 return disks;]]></script>
