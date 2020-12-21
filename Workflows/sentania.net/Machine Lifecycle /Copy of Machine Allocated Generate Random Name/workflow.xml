@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:workflow xmlns:ns2="http://vmware.com/vco/workflow" root-name="item2" object-name="workflow:name=generic" id="a82a544b-d97e-46d7-8e4f-01f9b73f5bbc" editor-version="2.0" version="0.0.1" api-version="6.0.0" allowed-operations="vef" restartMode="1" resumeFromFailedMode="0">
+    <display-name>Copy of Machine Allocated Generate Random Name</display-name>
+    <position y="50.0" x="100.0"/>
+    <input>
+        <param name="inputProperties" type="Properties"/>
+    </input>
+    <output>
+        <param name="resourceNames" type="Array/string"/>
+    </output>
+    <attrib name="customProps" type="Properties">
+        <value encoded="n">{}</value>
+    </attrib>
+    <workflow-item name="item0" type="end" end-mode="0" comparator="0">
+        <in-binding/>
+        <out-binding/>
+        <position y="50.0" x="600.0"/>
+    </workflow-item>
+    <workflow-item name="item1" out-name="item0" type="task" comparator="0">
+        <display-name>Scriptable task</display-name>
+        <script encoded="false">//polls the SKYnet API to generate a host name for our VM&#13;
+var inputParameters= [];&#13;
+var restHost = RESTHostManager.getHost('6ec648b5-b7fa-445c-b9fa-b7cf8243ba97')  //refernce to the gitlab http rest host&#13;
+var restOperation = restHost.getOperation('6ec648b5-b7fa-445c-b9fa-b7cf8243ba97:d91680ed-2892-44cd-aa27-d809c6f4628f')  //reference to the rest API rest operation&#13;
+var contentobj = {operatingSystemCode:"l", environmentCode:"d", locationCode:"qts", functionCode: "blaze", identifier:0 };&#13;
+&#13;
+var contentJSON = JSON.stringify(contentobj);&#13;
+System.log(contentJSON)&#13;
+var request = restOperation.createRequest(inputParameters,contentJSON);&#13;
+//set the request content type&#13;
+request.contentType = "application\/json";&#13;
+&#13;
+var response = request.execute();&#13;
+&#13;
+//prepare output parameters&#13;
+System.log("Response: " + response);&#13;
+statusCode = response.statusCode;&#13;
+statusCodeAttribute = statusCode;&#13;
+System.log("Status code: " + statusCode);&#13;
+contentLength = response.contentLength;&#13;
+headers = response.getAllHeaders();&#13;
+contentAsString = response.contentAsString;&#13;
+System.log("Content as string: " + contentAsString);&#13;
+&#13;
+//debug serverName&#13;
+var obj = {"id":54374,"operatingSystemCode":"l","environmentCode":"d","locationCode":"qts","functionCode":"blaze","identifier":35,"name":"ld-qts-blaze035","username":"CITADEL\\s_ucs","date":"2020-12-09T15:51:18.9447724-06:00"};&#13;
+System.log(obj);&#13;
+var serverName = obj.name;&#13;
+System.log("Generated servername is: " +serverName);&#13;
+var resourceNames = new Array();&#13;
+resourceNames.push(serverName)&#13;
+System.log(resourceNames);&#13;
+&#13;
+</script>
+        <in-binding>
+            <bind name="customProps" type="Properties" export-name="customProps"/>
+        </in-binding>
+        <out-binding>
+            <bind name="resourceNames" type="Array/string" export-name="resourceNames"/>
+        </out-binding>
+        <description>Simple task with custom script capability.</description>
+        <position y="60.0" x="340.0"/>
+    </workflow-item>
+    <workflow-item name="item2" out-name="item1" type="task" comparator="0">
+        <display-name>Get Custom Properties</display-name>
+        <script encoded="false">function dumpProperties(props,lvl){&#13;
+         var keys = props.keys;&#13;
+         var prefix = ""&#13;
+     for (var i=0; i&lt;lvl; i++){&#13;
+                   prefix = prefix + "";&#13;
+          }&#13;
+          for (k in keys){&#13;
+                 var key = keys[k];&#13;
+                 var value = props.get(keys[k])&#13;
+                 if ("Properties" == System.getObjectType(value)){&#13;
+                  System.log(prefix + key + "[")&#13;
+                  dumpProperties(value,(lvl+2));&#13;
+                  System.log(prefix+ "]")&#13;
+                 } else{&#13;
+                   System.log( prefix + key + ":" + value)&#13;
+                 }&#13;
+                 }&#13;
+   }&#13;
+&#13;
+   dumpProperties(inputProperties, 0)&#13;
+&#13;
+   var customProps = inputProperties.get("customProperties")&#13;
+   </script>
+        <in-binding>
+            <bind name="inputProperties" type="Properties" export-name="inputProperties"/>
+        </in-binding>
+        <out-binding>
+            <bind name="customProps" type="Properties" export-name="customProps"/>
+        </out-binding>
+        <description>Simple task with custom script capability.</description>
+        <position y="60.0" x="200.0"/>
+    </workflow-item>
+    <presentation/>
+</ns2:workflow>

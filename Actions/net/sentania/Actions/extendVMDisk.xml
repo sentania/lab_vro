@@ -5,14 +5,12 @@
   <param n="increaseSizeGB" t="number"><![CDATA[]]></param>
   <script encoded="false"><![CDATA[var devices = vm.config.hardware.device;
 System.log(devices)
-
 for (i in devices){
     if (devices[i].deviceInfo.label == diskString){
         var disk = devices[i]
         System.log("Disk = " + disk.deviceInfo.label)
     }
 }
-
 var newSizeKB = disk.capacityInKB + (increaseSizeGB * 1024 * 1024)
 System.log("New Size KB = " + newSizeKB)
 var spec = new VcVirtualMachineConfigSpec();
@@ -24,7 +22,5 @@ deviceChange.device = disk;
 deviceChange.device.capacityInKB = newSizeKB;
 deviceChanges.push(deviceChange);
 spec.deviceChange = deviceChanges
-
-
 return vm.reconfigVM_Task(spec); ]]></script>
 </dunes-script-module>

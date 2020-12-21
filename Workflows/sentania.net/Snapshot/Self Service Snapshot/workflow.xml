@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:workflow xmlns:ns2="http://vmware.com/vco/workflow" root-name="item4" object-name="workflow:name=generic" id="1bf89e9d-a5b9-4752-ac64-af757fdc45b5" editor-version="2.0" version="0.1.1" api-version="6.0.0" allowed-operations="vfe" restartMode="1" resumeFromFailedMode="0">
+    <display-name>Self Service Snapshot</display-name>
+    <position y="50.0" x="100.0"/>
+    <input>
+        <param name="vm" type="VC:VirtualMachine"/>
+        <param name="name" type="string"/>
+        <param name="description" type="string"/>
+        <param name="expirationDate" type="Date"/>
+    </input>
+    <output/>
+    <attrib name="memory" type="boolean">
+        <value encoded="n">true</value>
+    </attrib>
+    <attrib name="quiesce" type="boolean">
+        <value encoded="n">false</value>
+    </attrib>
+    <attrib name="snapshot" type="VC:VirtualMachineSnapshot">
+        <value encoded="n"/>
+    </attrib>
+    <attrib name="scheduledTask" type="Task">
+        <value encoded="n"/>
+    </attrib>
+    <attrib name="smtpHost" type="string">
+        <value encoded="n">mail16a.int.sentania.net</value>
+    </attrib>
+    <attrib name="smtpPort" type="number">
+        <value encoded="n">25.0</value>
+    </attrib>
+    <attrib name="fromName" type="string">
+        <value encoded="n">vRealize Automation</value>
+    </attrib>
+    <attrib name="fromAddress" type="string">
+        <value encoded="n">vra@sentania.net</value>
+    </attrib>
+    <attrib name="toAddress" type="string">
+        <value encoded="n">scott@sentania.net</value>
+    </attrib>
+    <attrib name="subject" type="string">
+        <value encoded="n">New Self Service Snapshot</value>
+    </attrib>
+    <attrib name="useSsl" type="boolean">
+        <value encoded="n">false</value>
+    </attrib>
+    <attrib name="useStartTls" type="boolean">
+        <value encoded="n">false</value>
+    </attrib>
+    <attrib name="content" type="string">
+        <value encoded="n">A new snapshot was taken</value>
+    </attrib>
+    <workflow-item name="item0" type="end" end-mode="0" comparator="0">
+        <in-binding/>
+        <out-binding/>
+        <position y="50.51177010245664" x="964.9369001555482"/>
+    </workflow-item>
+    <workflow-item name="item1" out-name="item2" type="link" linked-workflow-id="BD80808080808080808080808080808053C180800122528313869552e41805bb1" comparator="0">
+        <display-name>Create Snapshot</display-name>
+        <in-binding>
+            <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+            <bind name="name" type="string" export-name="name"/>
+            <bind name="description" type="string" export-name="description"/>
+            <bind name="memory" type="boolean" export-name="memory"/>
+            <bind name="quiesce" type="boolean" export-name="quiesce"/>
+        </in-binding>
+        <out-binding>
+            <bind name="snapshot" type="VC:VirtualMachineSnapshot" export-name="snapshot"/>
+        </out-binding>
+        <description> </description>
+        <position y="64.8984375" x="517.0"/>
+    </workflow-item>
+    <workflow-item name="item2" out-name="item0" type="task" launched-workflow-id="4d360484-b28c-457e-a2af-013796224213" comparator="0">
+        <display-name>Schedule workflow</display-name>
+        <script encoded="false">//Auto generated script, cannot be modified !
+var workflowToLaunch = Server.getWorkflowWithId("4d360484-b28c-457e-a2af-013796224213");
+if (workflowToLaunch == null) {
+	throw "Workflow not found";
+}
+
+var workflowParameters = new Properties();
+workflowParameters.put("snapshot",snapshot);
+workflowParameters.put("vm",vm);
+workflowParameters.put("description",description);
+scheduledTask = workflowToLaunch.schedule(workflowParameters, workflowScheduleDate);
+</script>
+        <in-binding>
+            <bind name="workflowScheduleDate" type="Date" export-name="expirationDate"/>
+            <bind name="snapshot" type="VC:VirtualMachineSnapshot" export-name="snapshot"/>
+            <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+            <bind name="description" type="string" export-name="description"/>
+        </in-binding>
+        <out-binding>
+            <bind name="scheduledTask" type="Task" export-name="scheduledTask"/>
+        </out-binding>
+        <description>Schedule a workflow and create a task.</description>
+        <position y="61.51177010245664" x="697.9369001555482"/>
+    </workflow-item>
+    <workflow-item name="item3" out-name="item1" type="link" linked-workflow-id="8D80808080808080808080808080808089808080012318760241416446ce5b52f" comparator="0">
+        <display-name>Notify Engineering Team</display-name>
+        <in-binding>
+            <bind name="smtpHost" type="string" export-name="smtpHost"/>
+            <bind name="smtpPort" type="number" export-name="smtpPort"/>
+            <bind name="username" type="string" export-name=""/>
+            <bind name="password" type="SecureString" export-name=""/>
+            <bind name="fromName" type="string" export-name="fromName"/>
+            <bind name="fromAddress" type="string" export-name="fromAddress"/>
+            <bind name="toAddress" type="string" export-name="toAddress"/>
+            <bind name="subject" type="string" export-name="subject"/>
+            <bind name="content" type="string" export-name="content"/>
+            <bind name="useSsl" type="boolean" export-name="useSsl"/>
+            <bind name="useStartTls" type="boolean" export-name="useStartTls"/>
+        </in-binding>
+        <out-binding/>
+        <description> </description>
+        <position y="61.5" x="298.0"/>
+    </workflow-item>
+    <workflow-item name="item4" out-name="item3" type="task" comparator="0">
+        <display-name>Generate Email Body</display-name>
+        <script encoded="false">content = "A new snapshot for VM: " + vm.name  + " has been requested with a description of: " + description + ".  It is scheduled to expire at: " + expirationDate</script>
+        <in-binding>
+            <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+            <bind name="name" type="string" export-name="name"/>
+            <bind name="description" type="string" export-name="description"/>
+            <bind name="expirationDate" type="Date" export-name="expirationDate"/>
+        </in-binding>
+        <out-binding>
+            <bind name="content" type="string" export-name="content"/>
+        </out-binding>
+        <description>Simple task with custom script capability.</description>
+        <position y="60.00588505122832" x="160.46845007777407"/>
+    </workflow-item>
+    <presentation/>
+</ns2:workflow>

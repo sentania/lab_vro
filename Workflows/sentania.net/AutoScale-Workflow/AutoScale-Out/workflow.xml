@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:workflow xmlns:ns2="http://vmware.com/vco/workflow" root-name="item2" object-name="workflow:name=generic" id="ad9c2e21-e09f-48d5-bb60-24027d9c7c1e" editor-version="2.0" version="0.0.0" api-version="6.0.0" allowed-operations="vfe" restartMode="1" resumeFromFailedMode="0">
+    <display-name>AutoScale-Out</display-name>
+    <position y="50.0" x="100.0"/>
+    <input>
+        <param name="vm" type="VC:VirtualMachine"/>
+    </input>
+    <output>
+        <param name="actionResult" type="string"/>
+    </output>
+    <attrib name="vRAUrl" type="string">
+        <value encoded="n">https://vra8.lab.sentania.net</value>
+    </attrib>
+    <attrib name="vmname" type="string">
+        <value encoded="n"></value>
+    </attrib>
+    <workflow-item name="item0" type="end" end-mode="0" comparator="0">
+        <in-binding/>
+        <out-binding/>
+        <position y="50.0" x="580.0"/>
+    </workflow-item>
+    <workflow-item name="item1" out-name="item0" type="task" script-module="com.vmware.autoscale_vRA8.1/AutoScale_Out_vRA" comparator="0">
+        <display-name>AutoScale-Out</display-name>
+        <script encoded="false">//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.vmware.autoscale_vRA8.1").AutoScale_Out_vRA(vRAUrl,vmname);
+</script>
+        <in-binding>
+            <bind name="vRAUrl" type="string" export-name="vRAUrl">
+                <description></description>
+            </bind>
+            <bind name="vmname" type="string" export-name="vmname">
+                <description></description>
+            </bind>
+        </in-binding>
+        <out-binding>
+            <bind name="actionResult" type="string" export-name="actionResult"/>
+        </out-binding>
+        <description>Add a note to the workflow schema.</description>
+        <position y="60.0" x="240.0"/>
+    </workflow-item>
+    <workflow-item name="item2" out-name="item1" type="task" comparator="0">
+        <display-name>Debug Request Info</display-name>
+        <script encoded="false">System.log("Beginning web front end scale out work flow");
+//Look at the VM object passed in, and extract the name of it.
+
+//we will pass this to the scale action to look up the deployment and perform out logic
+
+var vmname = vm.name;
+
+System.log('Impacted VM name: ' + vmname);
+
+
+
+</script>
+        <in-binding>
+            <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+        </in-binding>
+        <out-binding>
+            <bind name="vmname" type="string" export-name="vmname"/>
+        </out-binding>
+        <description>Simple task with custom script capability.</description>
+        <position y="60.0" x="160.0"/>
+    </workflow-item>
+    <presentation/>
+</ns2:workflow>

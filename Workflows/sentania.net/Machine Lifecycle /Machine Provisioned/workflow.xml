@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:workflow xmlns:ns2="http://vmware.com/vco/workflow" root-name="item1" object-name="workflow:name=generic" id="0d99565c-ef25-449e-8a14-666bd94df803" editor-version="2.0" version="0.0.0" api-version="6.0.0" restartMode="1" resumeFromFailedMode="0">
+    <display-name>Machine Provisioned</display-name>
+    <position y="50.0" x="100.0"/>
+    <input>
+        <param name="inputProperties" type="Properties"/>
+    </input>
+    <output/>
+    <attrib name="customProps" type="Properties">
+        <value encoded="n">{}</value>
+    </attrib>
+    <workflow-item name="item0" type="end" end-mode="0" comparator="0">
+        <in-binding/>
+        <out-binding/>
+        <position y="50.0" x="390.0"/>
+    </workflow-item>
+    <workflow-item name="item1" out-name="item2" type="task" comparator="0">
+        <display-name>Log Vars</display-name>
+        <script encoded="false">function dumpProperties(props,lvl){&#13;
+         var keys = props.keys;&#13;
+         var prefix = ""&#13;
+     for (var i=0; i&lt;lvl; i++){&#13;
+                   prefix = prefix + "";&#13;
+          }&#13;
+          for (k in keys){&#13;
+                 var key = keys[k];&#13;
+                 var value = props.get(keys[k])&#13;
+                 if ("Properties" == System.getObjectType(value)){&#13;
+                  System.log(prefix + key + "[")&#13;
+                  dumpProperties(value,(lvl+2));&#13;
+                  System.log(prefix+ "]")&#13;
+                 } else{&#13;
+                   System.log( prefix + key + ":" + value)&#13;
+                 }&#13;
+                 }&#13;
+   }&#13;
+&#13;
+   dumpProperties(inputProperties, 0)&#13;
+&#13;
+   var customProps = inputProperties.get("customProperties")&#13;
+   </script>
+        <in-binding>
+            <bind name="inputProperties" type="Properties" export-name="inputProperties"/>
+        </in-binding>
+        <out-binding>
+            <bind name="customProps" type="Properties" export-name="customProps"/>
+        </out-binding>
+        <description>Simple task with custom script capability.</description>
+        <position y="60.0" x="140.0"/>
+    </workflow-item>
+    <workflow-item name="item2" out-name="item0" type="task" comparator="0">
+        <display-name>Get MAC address</display-name>
+        <runtime>powercli:12-powershell-7.0</runtime>
+        <script encoded="false">function Handler($context, $inputs) {
+
+  $token = $context.GetToken()
+ 
+  $vRAUrl = "https://vra8.lab.sentania.net"
+ 
+  $machineID = $inputs.inputProperties.resourceIds
+  Write-host "Machine ID: $machineID"
+        #Create URL string for Invoke-RestMethod to get all deployments
+        $urlsend = $vRAUrl + "/iaas/api/machines/$machineID"
+
+        $n=Invoke-RestMethod -Method GET -uri $urlsend -Headers @{'Authorization' = "Bearer $token"} -SkipCertificateCheck
+
+        Write-host "Content is: $n"
+        $n.content
+        
+        $link = ($n.content | ?{$_.name -match "_links"}).id
+
+        Write-Host "links: " $depid
+
+
+    $output=@{status = 'done'}
+
+    return $output
+}
+</script>
+        <in-binding>
+            <bind name="inputProperties" type="Properties" export-name="inputProperties"/>
+        </in-binding>
+        <out-binding/>
+        <description>Simple task with custom script capability.</description>
+        <position y="60.0" x="260.0"/>
+    </workflow-item>
+    <presentation/>
+</ns2:workflow>

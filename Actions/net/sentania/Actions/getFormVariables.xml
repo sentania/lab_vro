@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getFormVariables" result-type="Array/string" api-version="6.0.0" id="645e04dd-b4e0-46f2-8cc5-b8b962f8f755" version="0.1.1" allowed-operations="vfe" category-name="net.sentania.Actions">
+  <param n="inputFile" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[//retruns an arragy of values from a file in gitlab to populate a custom form pulldown
+
+var restHost = RESTHostManager.getHost('b472e157-74e6-4ce6-93da-672191b39c2c')  //refernce to the gitlab http rest host
+var restOperation = restHost.getOperation('b472e157-74e6-4ce6-93da-672191b39c2c:31383576-1bc3-4d8e-8b72-5ee91412b8f2')  //reference to the rest API rest operation
+
+
+var request = restOperation.createRequest([inputFile]);
+//set the request content type
+request.contentType = "application\/json";
+
+//Customize the request here
+//request.setHeader("accept", "application/vnd.github.VERSION.raw");
+var response = request.execute();
+//prepare output parameters
+
+statusCode = response.statusCode;
+statusCodeAttribute = statusCode;
+
+contentLength = response.contentLength;
+headers = response.getAllHeaders();
+contentAsString = response.contentAsString;
+var outputarray = [];
+
+var contentArray = contentAsString.split("\n");
+for (index = 0; index < contentArray.length; ++index)
+{
+ 	var friendlyName = contentArray[index].split(',')[0];
+	if (friendlyName != '')
+	{
+		outputarray.push(friendlyName);
+	}
+}
+return outputarray]]></script>
+</dunes-script-module>
