@@ -9,12 +9,27 @@
     <attrib name="customProps" type="Properties">
         <value encoded="n">{}</value>
     </attrib>
+    <attrib name="vmobject" type="VC:VirtualMachine">
+        <value encoded="n"/>
+    </attrib>
+    <attrib name="vmname" type="string">
+        <value encoded="n"></value>
+    </attrib>
+    <attrib name="uuid" type="string">
+        <value encoded="n"></value>
+    </attrib>
+    <attrib name="notes" type="string">
+        <value encoded="n">Cost Code Info</value>
+    </attrib>
+    <attrib name="actionResult" type="Task">
+        <value encoded="n"/>
+    </attrib>
     <workflow-item name="item0" type="end" end-mode="0" comparator="0">
         <in-binding/>
         <out-binding/>
-        <position y="50.0" x="390.0"/>
+        <position y="50.0" x="600.0"/>
     </workflow-item>
-    <workflow-item name="item1" out-name="item2" type="task" comparator="0">
+    <workflow-item name="item1" out-name="item4" type="task" comparator="0">
         <display-name>Log Vars</display-name>
         <script encoded="false">function dumpProperties(props,lvl){&#13;
          var keys = props.keys;&#13;
@@ -38,51 +53,57 @@
    dumpProperties(inputProperties, 0)&#13;
 &#13;
    var customProps = inputProperties.get("customProperties")&#13;
+&#13;
+   var resourceNames = [];&#13;
+   resourceNames = inputProperties.get('resourceNames');&#13;
+   &#13;
+   var vmname = resourceNames[0];&#13;
    </script>
         <in-binding>
             <bind name="inputProperties" type="Properties" export-name="inputProperties"/>
         </in-binding>
         <out-binding>
             <bind name="customProps" type="Properties" export-name="customProps"/>
+            <bind name="uuid" type="string" export-name="uuid"/>
+            <bind name="vmname" type="string" export-name="vmname"/>
         </out-binding>
         <description>Simple task with custom script capability.</description>
         <position y="60.0" x="140.0"/>
     </workflow-item>
-    <workflow-item name="item2" out-name="item0" type="task" comparator="0">
-        <display-name>Get MAC address</display-name>
-        <runtime>powercli:12-powershell-7.0</runtime>
-        <script encoded="false">function Handler($context, $inputs) {
-
-  $token = $context.GetToken()
- 
-  $vRAUrl = "https://vra8.lab.sentania.net"
- 
-  $machineID = $inputs.inputProperties.resourceIds
-  Write-host "Machine ID: $machineID"
-        #Create URL string for Invoke-RestMethod to get all deployments
-        $urlsend = $vRAUrl + "/iaas/api/machines/$machineID"
-
-        $n=Invoke-RestMethod -Method GET -uri $urlsend -Headers @{'Authorization' = "Bearer $token"} -SkipCertificateCheck
-
-        Write-host "Content is: $n"
-        $n.content
-        
-        $link = ($n.content | ?{$_.name -match "_links"}).id
-
-        Write-Host "links: " $depid
-
-
-    $output=@{status = 'done'}
-
-    return $output
-}
+    <workflow-item name="item3" out-name="item0" type="task" script-module="net.sentania.Actions/SetNotesonVM" comparator="0">
+        <display-name>Set VM Notes</display-name>
+        <script encoded="false">//Auto generated script, cannot be modified !
+actionResult = System.getModule("net.sentania.Actions").SetNotesonVM(vm,notes);
 </script>
         <in-binding>
-            <bind name="inputProperties" type="Properties" export-name="inputProperties"/>
+            <bind name="vm" type="VC:VirtualMachine" export-name="vmobject">
+                <description></description>
+            </bind>
+            <bind name="notes" type="string" export-name="notes">
+                <description></description>
+            </bind>
         </in-binding>
-        <out-binding/>
-        <description>Simple task with custom script capability.</description>
-        <position y="60.0" x="260.0"/>
+        <out-binding>
+            <bind name="actionResult" type="Task" export-name="actionResult"/>
+        </out-binding>
+        <description>Add a note to the workflow schema.</description>
+        <position y="60.0" x="380.0"/>
+    </workflow-item>
+    <workflow-item name="item4" out-name="item3" type="task" script-module="net.sentania.Actions/getVCVMbyName" comparator="0">
+        <display-name>Action element</display-name>
+        <script encoded="false">//Auto generated script, cannot be modified !
+actionResult = System.getModule("net.sentania.Actions").getVCVMbyName(vmname);
+</script>
+        <in-binding>
+            <bind name="vmname" type="string" export-name="vmname">
+                <description></description>
+            </bind>
+        </in-binding>
+        <out-binding>
+            <bind name="actionResult" type="VC:VirtualMachine" export-name="vmobject"/>
+        </out-binding>
+        <description>Add a note to the workflow schema.</description>
+        <position y="61.42857142857143" x="241.58730158730157"/>
     </workflow-item>
     <presentation/>
 </ns2:workflow>

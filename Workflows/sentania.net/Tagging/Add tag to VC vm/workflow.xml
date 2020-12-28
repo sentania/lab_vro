@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item6" object-name="workflow:name=generic" id="90643f14-1ed9-402e-b57e-3d3e4d397a7b" version="1.2.0" api-version="6.0.0" allowed-operations="vfe" editor-version="1.6" restartMode="1" resumeFromFailedMode="0">
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item6" object-name="workflow:name=generic" id="90643f14-1ed9-402e-b57e-3d3e4d397a7b" version="1.2.2" api-version="6.0.0" allowed-operations="vfe" editor-version="1.6" restartMode="1" resumeFromFailedMode="0">
   <display-name><![CDATA[Add tag to VC vm]]></display-name>
   <position y="45.5" x="100.0"/>
   <input>
@@ -110,24 +110,24 @@ if (!newTagCategory){
     <position y="55.37417436824218" x="259.99984167904125"/>
   </workflow-item>
   <workflow-item name="item6" out-name="item5" type="task">
-    <display-name><![CDATA[Scriptable task]]></display-name>
+    <display-name><![CDATA[Find Endpoint]]></display-name>
     <script encoded="false"><![CDATA[var myVC = vCenterVm.sdkConnection.name
-System.log(myVC)
+System.log("vCenter URL:" + myVC)
 var endpointURL = myVC.replace("sdk", "api")
 var endpointURL = endpointURL.replace(":443", "")
-System.log(endpointURL)
+System.log("Endpoint URL: " +endpointURL)
 var myVAPI = VAPIManager.findEndpoint(endpointURL)
-var vapiEndpoint = myVAPI.name
-System.log("Target VAPI Endpoint is: " + vapiEndpoint)
+var endpoint = myVAPI.name
+System.log("Target VAPI Endpoint is: " + endpoint)
 ]]></script>
     <in-binding>
       <bind name="vCenterVm" type="VC:VirtualMachine" export-name="vCenterVm"/>
     </in-binding>
     <out-binding>
-      <bind name="vapiEndpoint" type="VAPI:VAPIEndpoint" export-name="vapiEndpoint"/>
+      <bind name="endpoint" type="string" export-name="endpoint"/>
     </out-binding>
     <description><![CDATA[Simple task with custom script capability.]]></description>
-    <position y="49.98254172957564" x="167.74992083952063"/>
+    <position y="58.0" x="160.0"/>
   </workflow-item>
   <presentation>
     <p-group>

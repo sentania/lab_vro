@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="SetNotesonVM" result-type="Task" api-version="6.0.0" id="3be9a0fc-6230-4334-bea5-73475db94856" version="0.0.0" category-name="net.sentania.Actions">
+  <param n="vm" t="VC:VirtualMachine"><![CDATA[]]></param>
+  <param n="notes" t="string"/>
+  <script encoded="false"><![CDATA[var oldNotes = vm.summary.config.annotation;
+if (oldNotes == null){oldNotes = "";}
+System.log("Current VM Notes: "+oldNotes);
+// Now set the new Notes:
+// Start by creating a ConfigSpec
+var configSpec = new VcVirtualMachineConfigSpec();
+// Update the annotation property with new value
+configSpec.annotation = notes;
+// launch task to reconfig the vm with the new configspec
+// NOTE: This is safe to apply with powered on VM
+var task = vm.reconfigVM_Task(configSpec);]]></script>
+</dunes-script-module>
