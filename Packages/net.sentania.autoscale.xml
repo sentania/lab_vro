@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <package>
 <elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='ad9c2e21-e09f-48d5-bb60-24027d9c7c1e'&dunesName='Workflow']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='d03b0471-f8fe-4378-a853-f70e9b808d1a'&dunesName='Action'&name='AutoScale_Out_vRA'&category='net.sentania.actions.autoscale']]></elm>
 <elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='318ea5d6-9a88-46c2-9a94-eef78fd4d888'&dunesName='Workflow']]></elm>
-<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='b048ce4a-3374-4a02-af8f-f564319438c5'&dunesName='Action'&name='AutoScale_In_vRA'&category='net.sentania.autoscale']]></elm>
-<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='d03b0471-f8fe-4378-a853-f70e9b808d1a'&dunesName='Action'&name='AutoScale_Out_vRA'&category='net.sentania.autoscale']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='b048ce4a-3374-4a02-af8f-f564319438c5'&dunesName='Action'&name='AutoScale_In_vRA'&category='net.sentania.actions.autoscale']]></elm>
 <used-plugin name='VC' version='6.5.0' />
 </package>

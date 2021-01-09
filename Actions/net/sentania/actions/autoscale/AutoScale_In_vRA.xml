@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<dunes-script-module name="AutoScale_In_vRA" result-type="string" api-version="6.0.0" id="b048ce4a-3374-4a02-af8f-f564319438c5" version="0.0.0" allowed-operations="vfe" category-name="net.sentania.actions.autoscale" memory-limit="2048000000">
+<dunes-script-module name="AutoScale_In_vRA" result-type="string" api-version="6.0.0" id="b048ce4a-3374-4a02-af8f-f564319438c5" version="1.0.0" allowed-operations="vfe" category-name="net.sentania.actions.autoscale" memory-limit="2048000000">
   <runtime><![CDATA[powercli:12-powershell-7.0]]></runtime>
   <param n="vRAUrl" t="string"><![CDATA[]]></param>
   <param n="vmname" t="string"><![CDATA[]]></param>
