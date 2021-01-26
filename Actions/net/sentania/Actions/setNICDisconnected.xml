@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="setNICDisconnected" result-type="string" api-version="6.0.0" id="4b28c675-e929-4d10-9825-a988e510a432" version="0.0.0" category-name="net.sentania.Actions">
+  <param n="vm" t="VC:VirtualMachine"/>
+  <script encoded="false"><![CDATA[var devices = vm.config.hardware.device;
+
+for (var i in devices) {
+
+    if (!System.getModule("com.vmware.library.vc.vm.network").isSupportedNic(devices[i])) {
+
+        continue;
+
+    }
+
+
+
+    var confSpec = new VcVirtualDeviceConfigSpec();
+
+    confSpec.operation = VcVirtualDeviceConfigSpecOperation.edit;
+
+    confSpec.device = devices[i];
+
+    confSpec.device.connectable.startConnected = false;  // true/false to whether to connect the NIC at power on or not
+
+    confSpec.device.connectable.connected = false;  // true/false to connect/disconnect the NIC
+
+
+    var spec = new VcVirtualMachineConfigSpec();
+
+    spec.deviceChange = [confSpec];
+
+    vm.reconfigVM_Task(spec);
+
+}]]></script>
+</dunes-script-module>

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:workflow xmlns:ns2="http://vmware.com/vco/workflow" root-name="item4" object-name="workflow:name=generic" id="22f7b816-b0f5-4208-af95-138053c29d34" editor-version="2.0" version="0.0.0" api-version="6.0.0" restartMode="1" resumeFromFailedMode="0">
+    <display-name>Decom Phase 1</display-name>
+    <position y="50.0" x="100.0"/>
+    <input/>
+    <output/>
+    <attrib name="today" type="Date">
+        <value encoded="n"/>
+    </attrib>
+    <attrib name="actionResult" type="string">
+        <value encoded="n"></value>
+    </attrib>
+    <attrib name="vm" type="VC:VirtualMachine">
+        <value encoded="n"/>
+    </attrib>
+    <attrib name="vmname" type="string">
+        <value encoded="n"></value>
+    </attrib>
+    <attrib name="deploymentID" type="string">
+        <value encoded="n"></value>
+    </attrib>
+    <attrib name="scheduledTaskID" type="Task">
+        <value encoded="n"/>
+    </attrib>
+    <workflow-item name="item0" type="end" end-mode="0" comparator="0">
+        <in-binding/>
+        <out-binding/>
+        <position y="120.0" x="440.0"/>
+    </workflow-item>
+    <workflow-item name="item1" out-name="item0" type="task" launched-workflow-id="755e9c42-dfdd-4e57-9b61-6b7555b4cbae" comparator="0">
+        <display-name>Schedule Decom Phase 2</display-name>
+        <script encoded="false">//Auto generated script, cannot be modified !
+var workflowToLaunch = Server.getWorkflowWithId("755e9c42-dfdd-4e57-9b61-6b7555b4cbae");
+if (workflowToLaunch == null) {
+	throw "Workflow not found";
+}
+
+var workflowParameters = new Properties();
+scheduledTask = workflowToLaunch.schedule(workflowParameters, workflowScheduleDate);
+</script>
+        <in-binding>
+            <bind name="workflowScheduleDate" type="Date" export-name="today"/>
+        </in-binding>
+        <out-binding>
+            <bind name="scheduledTask" type="Task" export-name="scheduledTaskID"/>
+        </out-binding>
+        <description>Schedule a workflow and create a task.</description>
+        <position y="130.0" x="560.0"/>
+    </workflow-item>
+    <workflow-item name="item2" out-name="item3" type="task" comparator="0">
+        <display-name>Determine Expiration Date</display-name>
+        <script encoded="false">//Determine date to destroy machine&#13;
+&#13;
+var date = new Date();&#13;
+date.setDate(date.getDate() + 7);&#13;
+System.log('Calculated Expire date is: '+ date);&#13;
+&#13;
+var today = date;</script>
+        <in-binding/>
+        <out-binding>
+            <bind name="today" type="Date" export-name="today"/>
+        </out-binding>
+        <description>Simple task with custom script capability.</description>
+        <position y="60.0" x="440.0"/>
+    </workflow-item>
+    <workflow-item name="item3" out-name="item1" type="task" script-module="net.sentania.Actions/setNICDisconnected" comparator="0">
+        <display-name>Disconnect VM Nics</display-name>
+        <script encoded="false">//Auto generated script, cannot be modified !
+actionResult = System.getModule("net.sentania.Actions").setNICDisconnected(vm);
+</script>
+        <in-binding>
+            <bind name="vm" type="VC:VirtualMachine" export-name="vm">
+                <description></description>
+            </bind>
+        </in-binding>
+        <out-binding>
+            <bind name="actionResult" type="string" export-name="actionResult"/>
+        </out-binding>
+        <description>Add a note to the workflow schema.</description>
+        <position y="60.0" x="560.0"/>
+    </workflow-item>
+    <workflow-item name="item4" out-name="item6" type="task" comparator="0">
+        <display-name>Process metadata inputs</display-name>
+        <script encoded="false">//Because we are working as a day 2 action we need to process the metadata from vRA to determine what we need to work on.&#13;
+&#13;
+var deploymentID = System.getContext().getParameter('__metadata_deploymentId');&#13;
+&#13;
+System.log('DeploymentID: ' + deploymentID);&#13;
+</script>
+        <in-binding/>
+        <out-binding>
+            <bind name="deploymentID" type="string" export-name="deploymentID"/>
+        </out-binding>
+        <description>Simple task with custom script capability.</description>
+        <position y="60.0" x="140.0"/>
+    </workflow-item>
+    <workflow-item name="item5" out-name="item2" type="task" script-module="net.sentania.Actions/getVCVMbyName" comparator="0">
+        <display-name>Get VM Object</display-name>
+        <script encoded="false">//Auto generated script, cannot be modified !
+actionResult = System.getModule("net.sentania.Actions").getVCVMbyName(vmname);
+</script>
+        <in-binding>
+            <bind name="vmname" type="string" export-name="vmname">
+                <description></description>
+            </bind>
+        </in-binding>
+        <out-binding>
+            <bind name="actionResult" type="VC:VirtualMachine" export-name="vm"/>
+        </out-binding>
+        <description>Add a note to the workflow schema.</description>
+        <position y="120.0" x="200.0"/>
+    </workflow-item>
+    <workflow-item name="item6" out-name="item5" type="task" comparator="0">
+        <display-name>Get Deployment VM</display-name>
+        <runtime>powercli:12-powershell-7.0</runtime>
+        <script encoded="false">function Handler($context, $inputs) {
+ 
+  $token = $context.GetToken()
+ 
+  $vRAUrl = "https://vra8.lab.sentania.net"
+  $deploymentID = $inputs.deploymentID
+
+  Write-host "vRA URL is: $vRAUrl"
+  Write-host "Machine to Decom deploymentID is: $deploymentID"
+
+  ##we need to get the VM that belongs to the deployment 
+  $getMachineListURL = "$vRAUrl/iaas/api/machines/"
+
+$machineListResult = Invoke-RestMethod -Method GET -uri $getMachineListURL -Headers @{'Authorization' = "Bearer $token"} -skipcertificatecheck
+
+$vmname = ($machineListResult.content | ?{$_.deploymentId -match $deploymentId}).name
+Write-host "VM Name is: $vmname"
+$output=@{vmname = $vmname}
+}</script>
+        <in-binding>
+            <bind name="deploymentID" type="string" export-name="deploymentID"/>
+        </in-binding>
+        <out-binding>
+            <bind name="vmname" type="string" export-name="vmname"/>
+        </out-binding>
+        <description>Simple task with custom script capability.</description>
+        <position y="60.0" x="239.0"/>
+    </workflow-item>
+    <presentation/>
+</ns2:workflow>

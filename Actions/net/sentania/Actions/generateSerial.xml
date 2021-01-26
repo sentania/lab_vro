@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="generateSerial" result-type="string" api-version="6.0.0" id="3eff1f2e-7a03-49e2-a27f-3c26925f2542" version="0.0.0" category-name="net.sentania.Actions">
+  <param n="biosID" t="string"/>
+  <script encoded="false"><![CDATA[
+var split = biosID.split('-');
+
+System.log(split)
+var part1 = split[0].match(/.{1,2}/g).join(' ');
+var part2 = split[1].match(/.{1,2}/g).join(' ');
+var part3 = split[2].match(/.{1,2}/g).join(' ');
+var part4 = split[3].match(/.{1,2}/g).join(' ');
+var part5 = split[4].match(/.{1,2}/g).join(' ');
+
+var UUID = part1 + " " + part2 + " " + part3 + "-"+ part4 + "-"+ part5;
+
+var serial = "VMware-" + UUID;
+
+return serial;]]></script>
+</dunes-script-module>
