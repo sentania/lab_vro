@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:workflow xmlns:ns2="http://vmware.com/vco/workflow" root-name="item1" object-name="workflow:name=generic" id="ba12dae1-5317-43b2-bda2-b208d395f8bb" editor-version="2.0" version="0.0.1" api-version="6.0.0" restartMode="1" resumeFromFailedMode="0">
+    <display-name>Network Configure</display-name>
+    <description>A simple workflow demonstrating how to update the IP address of a VM inflight based on external logic</description>
+    <position y="50.0" x="100.0"/>
+    <input>
+        <param name="inputProperties" type="Properties"/>
+    </input>
+    <output>
+        <param name="addresses" type="Array/Array"/>
+        <param name="cidrs" type="Array/Array"/>
+        <param name="gateways" type="Array/Array"/>
+    </output>
+    <attrib name="customProps" type="Properties">
+        <value encoded="n">{}</value>
+    </attrib>
+    <workflow-item name="item0" type="end" end-mode="0" comparator="0">
+        <in-binding/>
+        <out-binding/>
+        <position y="50.0" x="500.0"/>
+    </workflow-item>
+    <workflow-item name="item1" out-name="item2" type="task" script-module="net.sentania.Actions/parseInputProperties" comparator="0">
+        <display-name>Log Properties</display-name>
+        <script encoded="false">//Auto generated script, cannot be modified !
+actionResult = System.getModule("net.sentania.Actions").parseInputProperties(inputProperties);
+</script>
+        <in-binding>
+            <bind name="inputProperties" type="Properties" export-name="inputProperties">
+                <description></description>
+            </bind>
+        </in-binding>
+        <out-binding>
+            <bind name="actionResult" type="Properties" export-name="customProps"/>
+        </out-binding>
+        <description>Add a note to the workflow schema.</description>
+        <position y="60.0" x="200.0"/>
+    </workflow-item>
+    <workflow-item name="item2" out-name="item0" type="task" comparator="0">
+        <display-name>Scriptable task</display-name>
+        <script encoded="false">var address = []&#13;
+var addresses = []&#13;
+&#13;
+address.push("10.101.26.200")&#13;
+&#13;
+addresses.push(address)&#13;
+&#13;
+var cidr = []&#13;
+var cidrs = []&#13;
+cidr.push("10.101.26.0/24")&#13;
+cidrs.push(cidr)&#13;
+&#13;
+var gw = []&#13;
+var gateway = []&#13;
+var gateways = []&#13;
+gw.push("10.101.26.1")&#13;
+gateway.push(gw)&#13;
+gateways.push(gateway)</script>
+        <in-binding/>
+        <out-binding>
+            <bind name="addresses" type="Array/Array" export-name="addresses"/>
+            <bind name="cidrs" type="Array/Array" export-name="cidrs"/>
+            <bind name="gateways" type="Array/Array" export-name="gateways"/>
+        </out-binding>
+        <description>Simple task with custom script capability.</description>
+        <position y="60.0" x="340.0"/>
+    </workflow-item>
+    <presentation/>
+</ns2:workflow>

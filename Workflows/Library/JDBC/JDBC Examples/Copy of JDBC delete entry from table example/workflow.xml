@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:workflow xmlns:ns2="http://vmware.com/vco/workflow" root-name="item0" object-name="Workflow:name=generic" id="94a8eb49-93bd-4d50-b1ee-3153773a9f92" editor-version="2.0" version="1.1.4" api-version="3.1.0" allowed-operations="vef" restartMode="1">
+    <display-name>Copy of JDBC delete entry from table example</display-name>
+    <description>Tests the deletion of an entry from a table.</description>
+    <position y="30.0" x="180.0"/>
+    <input>
+        <param name="user" type="string">
+            <description>Username</description>
+        </param>
+        <param name="url" type="string">
+            <description>JDBC connection URL</description>
+        </param>
+        <param name="password" type="SecureString">
+            <description>Password</description>
+        </param>
+        <param name="ID" type="number">
+            <description>User's first name</description>
+        </param>
+    </input>
+    <output/>
+    <workflow-item name="item0" out-name="item1" type="task" comparator="0">
+        <display-name>Delete from table</display-name>
+        <script encoded="false">var main = new JDBCConnection();
+var con;
+
+var sqlStatement = 'delete from wp_posts where ID = ?' ;
+try  {
+	con = main.getConnection( url, user, password );
+	System.log( "Connection to database successful" );
+	
+	var stat = con.prepareStatement( sqlStatement );
+	stat.setInt( 1, ID );
+
+	var result = stat.executeUpdate();
+	stat.close();
+	if ( result == 1 )  {
+		System.log( "Table row ('"+ID+"') deleted successfully" );
+	} else  {
+		System.log( "Nothing to delete" );
+	}
+}
+catch( ex )  {
+	throw "Connection to database failed (Reason: " + ex + ")";
+} finally {
+	if (con) {
+		con.close();
+	}
+}
+</script>
+        <in-binding>
+            <bind name="user" type="string" export-name="user"/>
+            <bind name="url" type="string" export-name="url"/>
+            <bind name="password" type="SecureString" export-name="password"/>
+            <bind name="ID" type="number" export-name="ID"/>
+        </in-binding>
+        <out-binding/>
+        <description>Create a table</description>
+        <position y="80.0" x="140.0"/>
+    </workflow-item>
+    <workflow-item name="item1" type="end" end-mode="0" comparator="0">
+        <in-binding/>
+        <out-binding/>
+        <position y="110.0" x="180.0"/>
+    </workflow-item>
+    <presentation>
+        <p-step>
+            <title>Parameters</title>
+            <p-group>
+                <title>Connections</title>
+                <desc>Information about connection to the Database. sample: jdbc://host:port/tableName</desc>
+                <p-param name="firstName">
+                    <desc>User's first name</desc>
+                </p-param>
+                <p-param name="user">
+                    <desc>Username</desc>
+                </p-param>
+                <p-param name="url">
+                    <desc>JDBC connection URL</desc>
+                </p-param>
+                <p-param name="lastName">
+                    <desc>User's last name</desc>
+                </p-param>
+                <p-param name="password">
+                    <desc>Password</desc>
+                </p-param>
+            </p-group>
+            <p-group>
+                <title>SQL Query</title>
+                <desc>A delete SQL Statement</desc>
+                <p-param name="sqlStatement">
+                    <desc>SQL statement</desc>
+                </p-param>
+            </p-group>
+        </p-step>
+    </presentation>
+</ns2:workflow>

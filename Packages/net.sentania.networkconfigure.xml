@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<package>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='ba12dae1-5317-43b2-bda2-b208d395f8bb'&dunesName='Workflow']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='8c4d63c8-87a4-4331-a260-60ed3736b182'&dunesName='Action'&name='parseInputProperties'&category='net.sentania.Actions']]></elm>
+</package>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:workflow xmlns:ns2="http://vmware.com/vco/workflow" root-name="item0" object-name="Workflow:name=generic" id="fbb95a18-bb11-44e7-ad67-3bb3ca7d9fb4" editor-version="2.0" version="3.1.4" api-version="3.1.0" allowed-operations="vef" restartMode="1">
+    <display-name>Copy of JDBC select from table example</display-name>
+    <description>Test JDBC table select rows</description>
+    <position y="20.0" x="120.0"/>
+    <input>
+        <param name="url" type="string">
+            <description>Database URL, in the form jdbc:subprotocol:subname</description>
+        </param>
+        <param name="user" type="string">
+            <description>Database user</description>
+        </param>
+        <param name="password" type="SecureString">
+            <description>Password</description>
+        </param>
+        <param name="sqlStatement" type="string">
+            <description>SQL statement</description>
+        </param>
+    </input>
+    <output/>
+    <workflow-item name="item0" out-name="item1" type="task" comparator="0">
+        <display-name>Select from table</display-name>
+        <script encoded="false">var main = new JDBCConnection();
+var con;
+try  {
+	con = main.getConnection( url, user, password );
+	System.log( "Connection to database successful" );
+	var stat = con.createStatement();
+	var rs = stat.executeQuery( sqlStatement );
+	var i = 0;
+	var firstNameColName = "post_title";
+	var lastNameColName = "post_excerpt";
+	while ( rs.next() )  {
+		System.log( "Row[" + i + "] : " + firstNameColName + "='" + rs.getString(firstNameColName)
+		  + "', " + lastNameColName + "='" + rs.getString(lastNameColName) + "'" );
+		i++;
+	}
+	if ( i == 0 )  {
+		System.log( "No rows" );
+	}
+	rs.close();
+	stat.close();
+} catch( ex )  {
+	throw "Connection to database failed (Reason: " + ex + ")";
+} finally {
+	if (con) {
+		con.close();
+	}
+}</script>
+        <in-binding>
+            <bind name="url" type="string" export-name="url"/>
+            <bind name="user" type="string" export-name="user"/>
+            <bind name="password" type="SecureString" export-name="password"/>
+            <bind name="sqlStatement" type="string" export-name="sqlStatement"/>
+        </in-binding>
+        <out-binding/>
+        <description>Create a table</description>
+        <position y="80.0" x="80.0"/>
+    </workflow-item>
+    <workflow-item name="item1" type="end" end-mode="0" comparator="0">
+        <in-binding/>
+        <out-binding/>
+        <position y="110.0" x="120.0"/>
+    </workflow-item>
+    <presentation>
+        <p-step>
+            <title>Parameters</title>
+            <p-group>
+                <title>Database connection</title>
+                <desc>Database connection parameters</desc>
+                <p-param name="url">
+                    <desc>Database URL</desc>
+                </p-param>
+                <p-param name="user">
+                    <desc>Database user</desc>
+                </p-param>
+                <p-param name="password">
+                    <desc>Password</desc>
+                </p-param>
+            </p-group>
+            <p-group>
+                <title>SQL statement</title>
+                <desc>SQL statement to select from table</desc>
+                <p-param name="sqlStatement">
+                    <desc>SQL statement</desc>
+                </p-param>
+            </p-group>
+        </p-step>
+    </presentation>
+</ns2:workflow>
