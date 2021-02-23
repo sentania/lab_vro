@@ -1,0 +1,152 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="9dd84601-de41-4307-b7db-3fd4a2645328" version="0.0.0" api-version="6.0.0" allowed-operations="evf" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Check Snapshots - All vCenters]]></display-name>
+  <position y="100.45454545454544" x="105.0"/>
+  <input>
+    <param name="Config" type="ConfigurationElement"/>
+  </input>
+  <attrib name="all_vcenters" type="Array/VC:SdkConnection" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="vcenter_info" type="Array/Array" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="current_vcenter" type="VC:SdkConnection" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="current_vcenter_position" type="number" read-only="false">
+    <value encoded="n"><![CDATA[0.0]]></value>
+  </attrib>
+  <attrib name="SendEmail" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[false]]></value>
+  </attrib>
+  <attrib name="current_vcenter_results" type="Array/Array" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="Subject" type="string" read-only="false">
+    <value encoded="n"><![CDATA[Snapshot Results]]></value>
+  </attrib>
+  <attrib name="errorCode" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="email_results_to" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <workflow-item name="item1" out-name="item2" catch-name="item8" throw-bind-name="errorCode" type="task">
+    <display-name><![CDATA[Initialise]]></display-name>
+    <script encoded="false"><![CDATA[all_vcenters = VcPlugin.allSdkConnections;
+vcenter_info = new Array();
+
+function getConfigurationElementAttribute(key) {
+	var ce = Config.getAttributeWithKey(key);
+	if (ce != null) {
+		return ce.value;
+	} else {
+		throw "Missing parameter for " + key;
+	}
+}
+
+email_results_to = getConfigurationElementAttribute("results_email_to");
+SendEmail = getConfigurationElementAttribute("results_email_send");
+Subject = getConfigurationElementAttribute("results_email_subject");]]></script>
+    <in-binding>
+      <bind name="Config" type="ConfigurationElement" export-name="Config"/>
+    </in-binding>
+    <out-binding>
+      <bind name="all_vcenters" type="Array/VC:SdkConnection" export-name="all_vcenters"/>
+      <bind name="vcenter_info" type="Array/Array" export-name="vcenter_info"/>
+      <bind name="email_results_to" type="string" export-name="email_results_to"/>
+      <bind name="SendEmail" type="boolean" export-name="SendEmail"/>
+      <bind name="Subject" type="string" export-name="Subject"/>
+    </out-binding>
+    <position y="109.95454545454544" x="204.5"/>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item4" type="custom-condition" alt-out-name="item0">
+    <display-name><![CDATA[Any vCenters left ?]]></display-name>
+    <script encoded="false"><![CDATA[return (all_vcenters != null && current_vcenter_position < all_vcenters.length);]]></script>
+    <in-binding>
+      <bind name="all_vcenters" type="Array/VC:SdkConnection" export-name="all_vcenters"/>
+      <bind name="current_vcenter_position" type="number" export-name="current_vcenter_position"/>
+    </in-binding>
+    <position y="99.95454545454544" x="344.5"/>
+  </workflow-item>
+  <workflow-item name="item3" type="end" end-mode="0">
+    <position y="227.22727272727272" x="384.5"/>
+  </workflow-item>
+  <workflow-item name="item4" out-name="item5" type="task">
+    <display-name><![CDATA[Assign Current]]></display-name>
+    <script encoded="false"><![CDATA[current_vcenter = all_vcenters[current_vcenter_position];]]></script>
+    <in-binding>
+      <bind name="all_vcenters" type="Array/VC:SdkConnection" export-name="all_vcenters"/>
+      <bind name="current_vcenter_position" type="number" export-name="current_vcenter_position"/>
+    </in-binding>
+    <out-binding>
+      <bind name="current_vcenter" type="VC:SdkConnection" export-name="current_vcenter"/>
+    </out-binding>
+    <position y="46.31818181818181" x="344.5"/>
+  </workflow-item>
+  <workflow-item name="item5" out-name="item6" type="link" linked-workflow-id="76c221bf-504c-46de-a5f0-457210ccd57d">
+    <display-name><![CDATA[Check Snapshots - vCenter Clusters]]></display-name>
+    <in-binding>
+      <bind name="vc" type="VC:SdkConnection" export-name="current_vcenter"/>
+      <bind name="Config" type="ConfigurationElement" export-name="Config"/>
+    </in-binding>
+    <out-binding>
+      <bind name="SnapshotResults" type="Array/Array" export-name="current_vcenter_results"/>
+    </out-binding>
+    <position y="46.31818181818181" x="504.5"/>
+  </workflow-item>
+  <workflow-item name="item6" out-name="item7" type="task">
+    <display-name><![CDATA[Handle Results]]></display-name>
+    <script encoded="false"><![CDATA[if (current_vcenter_results != null && current_vcenter_results.length > 0) {
+	for each (var item in current_vcenter_results) {
+		vcenter_info.push([current_vcenter.name, item[0], item[1]]);
+	}
+}]]></script>
+    <in-binding>
+      <bind name="vcenter_info" type="Array/Array" export-name="vcenter_info"/>
+      <bind name="current_vcenter_results" type="Array/Array" export-name="current_vcenter_results"/>
+      <bind name="current_vcenter" type="VC:SdkConnection" export-name="current_vcenter"/>
+    </in-binding>
+    <out-binding>
+      <bind name="vcenter_info" type="Array/Array" export-name="vcenter_info"/>
+    </out-binding>
+    <position y="46.31818181818181" x="664.5"/>
+  </workflow-item>
+  <workflow-item name="item7" prototype-id="increase-counter" out-name="item2" content-mode="x" type="task">
+    <display-name><![CDATA[Increase counter]]></display-name>
+    <script encoded="false"><![CDATA[//Auto-generated script
+counter = counter+1;]]></script>
+    <in-binding>
+      <bind name="counter" type="number" export-name="current_vcenter_position">
+        <description><![CDATA[counter to increment]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="counter" type="number" export-name="current_vcenter_position">
+        <description><![CDATA[counter incremented]]></description>
+      </bind>
+    </out-binding>
+    <description><![CDATA[Increment a counter by one]]></description>
+    <position y="109.95454545454544" x="504.5"/>
+  </workflow-item>
+  <workflow-item name="item0" out-name="item3" type="link" linked-workflow-id="b2cb261b-481c-4485-95e4-d6ea6db16627">
+    <display-name><![CDATA[Check Snapshots - Email Results]]></display-name>
+    <in-binding>
+      <bind name="Subject" type="string" export-name="Subject"/>
+      <bind name="EmailTo" type="string" export-name="email_results_to"/>
+      <bind name="Results" type="Array/Array" export-name="vcenter_info"/>
+      <bind name="EmailCC" type="string" explicitly-not-bound="true" export-name="NULL"/>
+    </in-binding>
+    <out-binding/>
+    <position y="173.59090909090907" x="345.0"/>
+  </workflow-item>
+  <workflow-item name="item8" throw-bind-name="errorCode" type="end" end-mode="1">
+    <position y="163.59090909090907" x="245.0"/>
+  </workflow-item>
+  <presentation>
+    <p-param name="Config">
+      <desc><![CDATA[Config]]></desc>
+    </p-param>
+  </presentation>
+</workflow>

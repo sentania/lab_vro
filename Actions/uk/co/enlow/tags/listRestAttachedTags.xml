@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="listRestAttachedTags" result-type="Array/CompositeType(id:string,name:string,description:string,used_by:Array/string,category_id:string):tag" api-version="6.0.0" id="b56dcfd6-06eb-4a2f-b8f0-200dccfed5c6" version="0.0.1" allowed-operations="evf" category-name="uk.co.enlow.tags">
+  <param n="restHost" t="REST:RESTHost"><![CDATA[]]></param>
+  <param n="vc_obj" t="Any"><![CDATA[]]></param>
+  <param n="token" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[if (restHost == null) { throw "There is no REST Host specified."; }
+if (vc_obj == null) { throw "There is no object to attach the tag to."; }
+if (token == null || token.length == 0) { throw "There is no authentication token provided."; }
+
+// Put together the createSpec
+var object_id = { "object_id": { "type": vc_obj.vimType, "id": vc_obj.id } };
+var spec = JSON.stringify(object_id);
+System.log(spec);
+
+var request = restHost.createRequest("POST", "/com/vmware/cis/tagging/tag-association?~action=list-attached-tags", spec);
+request.setHeader("Content-Type", "application/json");
+request.setHeader("vmware-api-session-id", token);
+
+var result = null;
+var response = request.execute();
+if (response.statusCode == 200)
+{
+	result = new Array();
+	var tag_ids = JSON.parse(response.contentAsString).value;
+	
+	for each (var tag_id in tag_ids)
+	{	
+		// get the tag.
+		var tag = System.getModule("uk.co.enlow.tags").getRestTagByID(restHost, token, tag_id);
+		if (tag != null) {
+			result.push(tag);
+		}
+	}	
+}
+else
+{
+	throw response.statusCode + ":" + response.contentAsString;
+}
+
+return result;]]></script>
+</dunes-script-module>

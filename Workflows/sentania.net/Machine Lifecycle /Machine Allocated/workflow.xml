@@ -1,23 +1,25 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="af157dd7-5b50-440c-a0e0-f7bdb74134ae" version="0.1.0" api-version="6.0.0" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
-  <display-name><![CDATA[Machine Allocated]]></display-name>
-  <position y="50.0" x="100.0"/>
-  <input>
-    <param name="inputProperties" type="Properties"/>
-  </input>
-  <attrib name="customProps" type="string" read-only="false">
-    <value encoded="n"><![CDATA[]]></value>
-  </attrib>
-  <workflow-item name="item0" type="end" end-mode="0">
-    <in-binding/>
-    <position y="50.0" x="300.0"/>
-  </workflow-item>
-  <workflow-item name="item1" out-name="item0" type="task">
-    <display-name><![CDATA[Log Input ]]></display-name>
-    <script encoded="false"><![CDATA[function dumpProperties(props,lvl){
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:workflow xmlns:ns2="http://vmware.com/vco/workflow" root-name="item1" object-name="workflow:name=generic" id="af157dd7-5b50-440c-a0e0-f7bdb74134ae" editor-version="2.0" version="0.1.0" api-version="6.0.0" restartMode="1" resumeFromFailedMode="0">
+    <display-name>Machine Allocated</display-name>
+    <position y="50.0" x="100.0"/>
+    <input>
+        <param name="inputProperties" type="Properties"/>
+    </input>
+    <output/>
+    <attrib name="customProps" type="string">
+        <value encoded="n"></value>
+    </attrib>
+    <workflow-item name="item0" type="end" end-mode="0" comparator="0">
+        <in-binding/>
+        <out-binding/>
+        <position y="50.0" x="560.0"/>
+    </workflow-item>
+    <workflow-item name="item1" out-name="item0" type="task" comparator="0">
+        <display-name>Log Input </display-name>
+        <script encoded="false">function dumpProperties(props,lvl){
          var keys = props.keys;
          var prefix = ""
-     for (var i=0; i<lvl; i++){
+     for (var i=0; i&lt;lvl; i++){
                    prefix = prefix + "";
           }
           for (k in keys){
@@ -36,13 +38,15 @@
    dumpProperties(inputProperties, 0)
 
    var customProps = inputProperties.get("customProperties")
-   ]]></script>
-    <in-binding>
-      <bind name="inputProperties" type="Properties" export-name="inputProperties"/>
-    </in-binding>
-    <out-binding/>
-    <description><![CDATA[Simple task with custom script capability.]]></description>
-    <position y="60.0" x="164.0"/>
-  </workflow-item>
-  <presentation/>
-</workflow>
+
+   
+   </script>
+        <in-binding>
+            <bind name="inputProperties" type="Properties" export-name="inputProperties"/>
+        </in-binding>
+        <out-binding/>
+        <description>Simple task with custom script capability.</description>
+        <position y="60.0" x="164.0"/>
+    </workflow-item>
+    <presentation/>
+</ns2:workflow>

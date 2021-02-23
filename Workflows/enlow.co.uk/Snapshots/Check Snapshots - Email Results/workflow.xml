@@ -1,0 +1,105 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="b2cb261b-481c-4485-95e4-d6ea6db16627" version="0.0.0" api-version="6.0.0" allowed-operations="evf" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Check Snapshots - Email Results]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <input>
+    <param name="Subject" type="string"/>
+    <param name="EmailTo" type="string"/>
+    <param name="Results" type="Array/Array"/>
+    <param name="EmailCC" type="string"/>
+  </input>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <position y="45.40909090909091" x="384.5"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task">
+    <display-name><![CDATA[Scriptable task]]></display-name>
+    <script encoded="false"><![CDATA[function getHostNameFromURL(url) {
+	var start = 0;
+
+	var index = url.indexOf("//");
+	if (index != -1) {
+		start = index + 2;
+	}
+
+	var result = url.substring(start);
+    
+    var dot = result.indexOf(".");
+    var slash = result.indexOf("/");
+    var end = -1;
+    
+    if (dot > 0 && slash > 0) {
+    	end = Math.min(dot, slash);
+    
+    } else if (dot > 0 && slash == -1) {
+    	end = dot;
+    
+    } else if (dot == -1 && slash > 0) {
+    	end = slash;
+    
+    }
+	
+    if (end != -1) {
+    	result = result.substring(0, end);
+    }
+
+	return result;
+}
+
+var mail = new EmailMessage();
+mail.toAddress = EmailTo;
+if (EmailCC != null) {
+	mail.ccAddress = EmailCC;
+}
+mail.subject = Subject;
+
+var body = "<html><head>";
+
+body += "<style>body, td, th, p { font-family: Arial; font-size: 12px; } table, th, td { border: 1px solid black; } table {	border-collapse: collapse; } th, td { padding: 8px; }";
+body += "th { text-align: center; background-color: #0a77ba; color: white; } td { text-align: left; } tr:nth-child(even) { background-color: #f2f2f2; }</style>";
+
+body += "</head><body><H4>Snapshots</H4><P>This is a list of all VMs which have snapshots. Note that the size of the snapshot is only accurate if there is only one snapshot on the VM.</P>";
+var snap_table = "<table><tr><th>vCenter</th><th>Cluster</th><th>VM</th><th>Snapshot Name</th><th>Age (days)</th><th>Size (GB)</th><th>Created by</th><th>Notes</th></tr>";
+
+var total_snaps = 0;
+for each (var item in Results)
+{
+	var vcenter_name = getHostNameFromURL(item[0]);
+	var cluster_name = item[1];
+	
+	for each (var ss in item[2])
+	{
+		snap_table += "<tr><td>" + vcenter_name + "</td><td>" + cluster_name + "</td><td>" + ss.VMName + "</td><td>" + ss.Name + "</td><td>" + ss.Age + "</td><td>" + ss.SizeGB + "</td><td>" + ss.CreatedBy + "</td><td>" + ((ss.Result != null) ? ss.Result : "&nbsp;") + "</td></tr>";
+		total_snaps++;
+	}
+}
+
+body += "<P>There are " + total_snaps + " snapshots on VMs.</P>";
+body += snap_table;
+body += "</table></body></html>";
+
+mail.addMimePart(body, "text/html");
+mail.sendMessage();]]></script>
+    <in-binding>
+      <bind name="Subject" type="string" export-name="Subject"/>
+      <bind name="EmailTo" type="string" export-name="EmailTo"/>
+      <bind name="Results" type="Array/Array" export-name="Results"/>
+      <bind name="EmailCC" type="string" export-name="EmailCC"/>
+    </in-binding>
+    <out-binding/>
+    <position y="55.40909090909091" x="204.5"/>
+  </workflow-item>
+  <presentation>
+    <p-param name="Subject">
+      <desc><![CDATA[Subject]]></desc>
+    </p-param>
+    <p-param name="EmailTo">
+      <desc><![CDATA[EmailTo]]></desc>
+    </p-param>
+    <p-param name="Results">
+      <desc><![CDATA[Results]]></desc>
+    </p-param>
+    <p-param name="EmailCC">
+      <desc><![CDATA[EmailCC]]></desc>
+    </p-param>
+  </presentation>
+</workflow>

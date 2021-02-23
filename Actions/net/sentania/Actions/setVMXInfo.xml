@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="setVMXInfo" result-type="string" api-version="6.0.0" id="5084bf40-944b-475e-8a13-17d033ed8988" version="0.0.0" category-name="net.sentania.Actions">
+  <param n="vm" t="VC:VirtualMachine"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[var configSpec = new VcVirtualMachineConfigSpec;
+
+var optionvalues = [];
+
+guestinfo = new VcOptionValue;
+
+guestinfo.key = "guestinfo.ipxe.net0.ip";
+guestinfo.value = "10.100.100.5";
+
+optionvalues.push(guestinfo);
+configSpec.extraConfig = optionvalues;
+
+vm.reconfigVM_Task(configSpec);]]></script>
+</dunes-script-module>

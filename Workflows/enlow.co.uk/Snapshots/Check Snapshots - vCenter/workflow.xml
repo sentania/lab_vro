@@ -1,0 +1,274 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item7" object-name="workflow:name=generic" id="76c221bf-504c-46de-a5f0-457210ccd57d" version="0.0.0" api-version="6.0.0" allowed-operations="evf" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Check Snapshots - vCenter]]></display-name>
+  <position y="109.04545454545453" x="105.0"/>
+  <input>
+    <param name="vc" type="VC:SdkConnection"/>
+    <param name="Config" type="ConfigurationElement"/>
+  </input>
+  <output>
+    <param name="SnapshotResults" type="Array/Array"/>
+  </output>
+  <attrib name="all_clusters" type="Array/VC:ClusterComputeResource" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="current_cluster" type="VC:ClusterComputeResource" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="all_clusters_current_position" type="number" read-only="false">
+    <value encoded="n"><![CDATA[0.0]]></value>
+  </attrib>
+  <attrib name="errorCode" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="cluster_snapshot_info" type="Array/CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="cluster_details" type="Array/Array" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="Subject" type="string" read-only="false">
+    <value encoded="n"><![CDATA[Snapshot Results]]></value>
+  </attrib>
+  <attrib name="SendEmail" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="min_age" type="number" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="do_actions" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="no_creator_email" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="exclusion_tag_name" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="warn_age" type="number" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="delete_age" type="number" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="cc_address" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="email_results_to" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <workflow-item name="item1" out-name="item2" type="task">
+    <display-name><![CDATA[Get All Clusters]]></display-name>
+    <script encoded="false"><![CDATA[function sort_cluster_name(a, b) {
+	if (a.name > b.name) {
+		return 1;
+	} else if (a.name < b.name) {
+		return -1;
+	}
+	
+	return 0;
+}
+
+all_clusters = vc.getAllClusterComputeResources();
+
+all_clusters = all_clusters.sort(sort_cluster_name);]]></script>
+    <in-binding>
+      <bind name="vc" type="VC:SdkConnection" export-name="vc"/>
+    </in-binding>
+    <out-binding>
+      <bind name="all_clusters" type="Array/VC:ClusterComputeResource" export-name="all_clusters"/>
+    </out-binding>
+    <position y="182.68181818181816" x="204.5"/>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item4" type="custom-condition" alt-out-name="item13">
+    <display-name><![CDATA[Any Clusters left ?]]></display-name>
+    <script encoded="false"><![CDATA[return (all_clusters_current_position < all_clusters.length);]]></script>
+    <in-binding>
+      <bind name="all_clusters" type="Array/VC:ClusterComputeResource" export-name="all_clusters"/>
+      <bind name="all_clusters_current_position" type="number" export-name="all_clusters_current_position"/>
+    </in-binding>
+    <position y="172.68181818181816" x="344.5"/>
+  </workflow-item>
+  <workflow-item name="item3" type="end" end-mode="0">
+    <position y="299.95454545454544" x="864.5"/>
+  </workflow-item>
+  <workflow-item name="item4" out-name="item5" type="task">
+    <display-name><![CDATA[Set current cluster]]></display-name>
+    <script encoded="false"><![CDATA[current_cluster = all_clusters[all_clusters_current_position];
+System.log("Looking at snapshots in " + current_cluster.name);]]></script>
+    <in-binding>
+      <bind name="all_clusters" type="Array/VC:ClusterComputeResource" export-name="all_clusters"/>
+      <bind name="all_clusters_current_position" type="number" export-name="all_clusters_current_position"/>
+    </in-binding>
+    <out-binding>
+      <bind name="current_cluster" type="VC:ClusterComputeResource" export-name="current_cluster"/>
+    </out-binding>
+    <position y="119.04545454545453" x="344.5"/>
+  </workflow-item>
+  <workflow-item name="item5" out-name="item8" catch-name="item0" throw-bind-name="errorCode" type="link" linked-workflow-id="8bc83379-1992-4dd4-bbb3-54bbeeb15688">
+    <display-name><![CDATA[Check Snapshots - Cluster]]></display-name>
+    <in-binding>
+      <bind name="cluster" type="VC:ClusterComputeResource" export-name="current_cluster"/>
+      <bind name="min_age" type="number" export-name="min_age"/>
+      <bind name="do_actions" type="boolean" export-name="do_actions"/>
+      <bind name="no_creator_email" type="string" export-name="no_creator_email"/>
+      <bind name="exclusion_tag_name" type="string" export-name="exclusion_tag_name"/>
+      <bind name="warn_age" type="number" export-name="warn_age"/>
+      <bind name="delete_age" type="number" export-name="delete_age"/>
+      <bind name="cc_address" type="string" export-name="cc_address"/>
+    </in-binding>
+    <out-binding>
+      <bind name="ClusterSnapshots" type="Array/CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" export-name="cluster_snapshot_info"/>
+    </out-binding>
+    <position y="55.40909090909091" x="485.0"/>
+  </workflow-item>
+  <workflow-item name="item6" prototype-id="increase-counter" out-name="item2" content-mode="x" type="task">
+    <display-name><![CDATA[Increase counter]]></display-name>
+    <script encoded="false"><![CDATA[//Auto-generated script
+counter = counter+1;]]></script>
+    <in-binding>
+      <bind name="counter" type="number" export-name="all_clusters_current_position">
+        <description><![CDATA[counter to increment]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="counter" type="number" export-name="all_clusters_current_position">
+        <description><![CDATA[counter incremented]]></description>
+      </bind>
+    </out-binding>
+    <description><![CDATA[Increment a counter by one]]></description>
+    <position y="182.68181818181816" x="484.5"/>
+  </workflow-item>
+  <workflow-item name="item0" out-name="item6" type="task">
+    <display-name><![CDATA[Log Error]]></display-name>
+    <script encoded="false"><![CDATA[System.log("There was an error with the cluster ");]]></script>
+    <in-binding>
+      <bind name="errorCode" type="string" export-name="errorCode"/>
+    </in-binding>
+    <out-binding/>
+    <position y="119.04545454545453" x="624.5"/>
+  </workflow-item>
+  <workflow-item name="item7" out-name="item1" catch-name="item15" throw-bind-name="errorCode" type="task">
+    <display-name><![CDATA[Initialise]]></display-name>
+    <script encoded="false"><![CDATA[cluster_details = new Array();
+
+function getConfigurationElementAttribute(key) {
+	var ce = Config.getAttributeWithKey(key);
+	if (ce != null) {
+		return ce.value;
+	} else {
+		throw "Missing parameter for " + key;
+	}
+}
+
+email_results_to = getConfigurationElementAttribute("results_email_to");
+Subject = getConfigurationElementAttribute("results_email_subject");
+SendEmail = getConfigurationElementAttribute("results_email_send");
+min_age = getConfigurationElementAttribute("min_age");
+warn_age = getConfigurationElementAttribute("warn_age");
+delete_age = getConfigurationElementAttribute("delete_age");
+do_actions = getConfigurationElementAttribute("do_actions");
+no_creator_email = getConfigurationElementAttribute("no_creator_email");
+exclusion_tag_name = getConfigurationElementAttribute("exclusion_tag_name");
+cc_address = getConfigurationElementAttribute("cc_address");]]></script>
+    <in-binding>
+      <bind name="Config" type="ConfigurationElement" export-name="Config"/>
+    </in-binding>
+    <out-binding>
+      <bind name="cluster_details" type="Array/Array" export-name="cluster_details"/>
+      <bind name="SendEmail" type="boolean" export-name="SendEmail"/>
+      <bind name="min_age" type="number" export-name="min_age"/>
+      <bind name="do_actions" type="boolean" export-name="do_actions"/>
+      <bind name="no_creator_email" type="string" export-name="no_creator_email"/>
+      <bind name="exclusion_tag_name" type="string" export-name="exclusion_tag_name"/>
+      <bind name="warn_age" type="number" export-name="warn_age"/>
+      <bind name="delete_age" type="number" export-name="delete_age"/>
+      <bind name="cc_address" type="string" export-name="cc_address"/>
+      <bind name="Subject" type="string" export-name="Subject"/>
+      <bind name="email_results_to" type="string" export-name="email_results_to"/>
+    </out-binding>
+    <position y="182.68181818181816" x="64.5"/>
+  </workflow-item>
+  <workflow-item name="item8" out-name="item6" type="task">
+    <display-name><![CDATA[Append Results]]></display-name>
+    <script encoded="false"><![CDATA[if (cluster_snapshot_info != null && cluster_snapshot_info.length > 0) {
+	cluster_details.push([current_cluster.name, cluster_snapshot_info]);
+}]]></script>
+    <in-binding>
+      <bind name="current_cluster" type="VC:ClusterComputeResource" export-name="current_cluster"/>
+      <bind name="cluster_snapshot_info" type="Array/CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" export-name="cluster_snapshot_info"/>
+      <bind name="cluster_details" type="Array/Array" export-name="cluster_details"/>
+    </in-binding>
+    <out-binding>
+      <bind name="cluster_details" type="Array/Array" export-name="cluster_details"/>
+    </out-binding>
+    <position y="119.04545454545453" x="485.0"/>
+  </workflow-item>
+  <workflow-item name="item9" out-name="item14" type="condition" alt-out-name="item10" comparator="0">
+    <display-name><![CDATA[Send Email ?]]></display-name>
+    <script encoded="false"><![CDATA[//Generated by the system, cannot be edited
+return (SendEmail == true) ;]]></script>
+    <in-binding>
+      <bind name="SendEmail" type="boolean" export-name="SendEmail"/>
+    </in-binding>
+    <condition name="SendEmail" type="boolean" comparator="0" label="null">false</condition>
+    <position y="299.95454545454544" x="345.0"/>
+  </workflow-item>
+  <workflow-item name="item10" type="end" end-mode="0">
+    <position y="363.59090909090907" x="384.5"/>
+  </workflow-item>
+  <workflow-item name="item11" out-name="item3" catch-name="item12" throw-bind-name="errorCode" type="link" linked-workflow-id="b2cb261b-481c-4485-95e4-d6ea6db16627">
+    <display-name><![CDATA[Check Snapshots - Email Results]]></display-name>
+    <in-binding>
+      <bind name="Subject" type="string" export-name="Subject"/>
+      <bind name="EmailTo" type="string" export-name="email_results_to"/>
+      <bind name="Results" type="Array/Array" export-name="cluster_details"/>
+      <bind name="EmailCC" type="string" export-name="cc_address"/>
+    </in-binding>
+    <out-binding/>
+    <position y="309.95454545454544" x="665.0"/>
+  </workflow-item>
+  <workflow-item name="item12" throw-bind-name="errorCode" type="end" end-mode="1">
+    <position y="363.59090909090907" x="704.5"/>
+  </workflow-item>
+  <workflow-item name="item13" out-name="item9" type="task">
+    <display-name><![CDATA[Assign Results]]></display-name>
+    <script encoded="false"><![CDATA[SnapshotResults = cluster_details;]]></script>
+    <in-binding>
+      <bind name="cluster_details" type="Array/Array" export-name="cluster_details"/>
+    </in-binding>
+    <out-binding>
+      <bind name="SnapshotResults" type="Array/Array" export-name="SnapshotResults"/>
+    </out-binding>
+    <position y="246.3181818181818" x="345.0"/>
+  </workflow-item>
+  <workflow-item name="item14" out-name="item11" type="task">
+    <display-name><![CDATA[Prepare Email Results]]></display-name>
+    <script encoded="false"><![CDATA[var email_details = new Array();
+
+for each (var item in cluster_details) {
+	email_details.push([vc.name, item[0], item[1]]);
+}
+
+cluster_details = email_details;]]></script>
+    <in-binding>
+      <bind name="cluster_details" type="Array/Array" export-name="cluster_details"/>
+      <bind name="vc" type="VC:SdkConnection" export-name="vc"/>
+    </in-binding>
+    <out-binding>
+      <bind name="cluster_details" type="Array/Array" export-name="cluster_details"/>
+    </out-binding>
+    <position y="310.45454545454544" x="505.0"/>
+  </workflow-item>
+  <workflow-item name="item15" throw-bind-name="errorCode" type="end" end-mode="1">
+    <position y="236.3181818181818" x="104.5"/>
+  </workflow-item>
+  <presentation>
+    <p-param name="vc">
+      <desc><![CDATA[vc]]></desc>
+    </p-param>
+    <p-param name="Config">
+      <desc><![CDATA[Config]]></desc>
+    </p-param>
+  </presentation>
+</workflow>

@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="sortVirtualMachineArrayByName" result-type="Array/VC:VirtualMachine" api-version="6.0.0" id="9d9e6f4c-9d47-4847-8c53-c64267fbf2f8" version="0.0.0" allowed-operations="evf" category-name="uk.co.enlow.vm">
+  <param n="vm_array" t="Array/VC:VirtualMachine"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[if (vm_array == null) {
+	throw "Invalid Parameter.";
+}
+
+var sorted_vms = vm_array.sort(
+	function(a,b) { 
+		var result = 0;
+		if (a.name.toLowerCase() < b.name.toLowerCase())
+			result = -1;
+		else if (b.name.toLowerCase() < a.name.toLowerCase())
+			result = 1;
+
+		return result; 
+	}
+);
+
+return sorted_vms;]]></script>
+</dunes-script-module>

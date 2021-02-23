@@ -1,0 +1,412 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="32c6c8d2-9b54-417a-b518-aa787794125a" version="0.0.6" api-version="6.0.0" allowed-operations="evf" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Manage Snapshots - VM]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <input>
+    <param name="vm" type="VC:VirtualMachine"/>
+    <param name="snapshot" type="CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info"/>
+    <param name="no_creator_email" type="string">
+      <description><![CDATA[Email address to use if the snapshot creator cannot be found or does not have an email address.]]></description>
+    </param>
+    <param name="warn_age" type="number">
+      <description><![CDATA[Days old to start warning creators]]></description>
+    </param>
+    <param name="delete_age" type="number">
+      <description><![CDATA[Days old to automatically delete the snapshot]]></description>
+    </param>
+    <param name="cc_address" type="string"/>
+    <param name="token" type="string"/>
+  </input>
+  <output>
+    <param name="snapshot_removed" type="boolean"/>
+  </output>
+  <attrib name="raw_username" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="email_to" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="errorCode" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="remove_task" type="VC:Task" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="email_subject" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="email_header" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="progress" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[false]]></value>
+    <description><![CDATA[Log progess while waiting for the task]]></description>
+  </attrib>
+  <attrib name="pollRate" type="number" read-only="false">
+    <value encoded="n"><![CDATA[30.0]]></value>
+    <description><![CDATA[Polling rate for the task state [seconds]]]></description>
+  </attrib>
+  <attrib name="task_result" type="Any" read-only="false">
+    <value encoded="n"><![CDATA[Any#__NULL__]]></value>
+  </attrib>
+  <attrib name="no_creator" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <position y="299.95454545454544" x="664.5"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item11" type="task">
+    <display-name><![CDATA[Scriptable task]]></display-name>
+    <script encoded="false"><![CDATA[System.log("Managing snapshot '" + snapshot.Name + "' on '" + vm.name + "' by user " + snapshot.CreatedBy);
+
+if (snapshot.CreatedBy.length > 0) {
+	var start = snapshot.CreatedBy.indexOf("\\");
+	start = (start == -1) ? 0 : start + 1;
+	
+	var end = snapshot.CreatedBy.indexOf("@");
+	end = (end == -1) ? snapshot.CreatedBy.length : end;
+	
+	raw_username  = snapshot.CreatedBy.substring(start, end);
+} else {
+	raw_username = "";
+	
+}
+
+//System.log(raw_username);]]></script>
+    <in-binding>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+      <bind name="snapshot" type="CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" export-name="snapshot"/>
+    </in-binding>
+    <out-binding>
+      <bind name="raw_username" type="string" export-name="raw_username"/>
+    </out-binding>
+    <position y="55.40909090909091" x="204.5"/>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item4" type="custom-condition" alt-out-name="item5">
+    <display-name><![CDATA[Have creator ?]]></display-name>
+    <script encoded="false"><![CDATA[var result = (raw_username.length > 0);
+//System.log("Decision returning " + result);
+return result;]]></script>
+    <in-binding>
+      <bind name="raw_username" type="string" export-name="raw_username"/>
+    </in-binding>
+    <position y="45.40909090909091" x="484.5"/>
+  </workflow-item>
+  <workflow-item name="item4" out-name="item6" catch-name="item5" throw-bind-name="errorCode" type="task" script-module="uk.co.enlow.ad/getEmailAddressForUser">
+    <display-name><![CDATA[getEmailAddressForUser]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("uk.co.enlow.ad").getEmailAddressForUser(userName) ;]]></script>
+    <in-binding>
+      <bind name="userName" type="string" export-name="raw_username"/>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="email_to"/>
+    </out-binding>
+    <position y="55.40909090909091" x="624.5"/>
+  </workflow-item>
+  <workflow-item name="item5" out-name="item6" type="task">
+    <display-name><![CDATA[Set No owner email]]></display-name>
+    <script encoded="false"><![CDATA[//System.log("Setting email to the no_creator_email address - errorCode = " + errorCode);
+email_to = no_creator_email;
+no_creator = true;]]></script>
+    <in-binding>
+      <bind name="no_creator_email" type="string" export-name="no_creator_email"/>
+      <bind name="errorCode" type="string" export-name="errorCode"/>
+    </in-binding>
+    <out-binding>
+      <bind name="email_to" type="string" export-name="email_to"/>
+      <bind name="no_creator" type="boolean" export-name="no_creator"/>
+    </out-binding>
+    <position y="119.04545454545453" x="485.0"/>
+  </workflow-item>
+  <workflow-item name="item3" out-name="item0" type="task">
+    <display-name><![CDATA[Send email]]></display-name>
+    <script encoded="false"><![CDATA[function sort_display_tags(a, b) {
+	var result = 0;
+
+	if (a.category < b.category) {
+		result = -1;
+	
+	} else if (a.category > b.category) {
+		result = 1;
+		
+	}
+	
+	return result;
+}
+
+function sort_array_name(a, b) {
+	var result = 0;
+	
+	if (a.name < b.name) {
+		result = -1;
+	} else if (a.name > b.name) {
+		result = 1;
+	}
+
+	return result;
+}
+
+var mail = new EmailMessage();
+mail.subject = email_subject;
+mail.toAddress = email_to;
+mail.ccAddress = cc_address;
+
+var body = "<html><head>";
+
+body += "<style>body, td, th, p { font-family: Arial; font-size: 12px; } table, th, td { border: 1px solid black; } table {	border-collapse: collapse; } th, td { padding: 8px; }";
+body += "th { text-align: center; background-color: #0a77ba; color: white; } td { text-align: left; } tr:nth-child(even) { background-color: #f2f2f2; }</style>";
+
+body += "</head><body><P>" + email_header + "</P>";
+
+if (no_creator == true) {
+	body += "<P>The snapshot creator could not be detected so this email is being sent to the fallback address.</P>";
+}
+
+body += "<P>VM: " + vm.name + "<br />";
+body += "vCenter: " + System.getModule("uk.co.enlow.util").getFQDNFromURL(vm.sdkConnection.name) + "<br />";
+body += "Cluster: " + System.getModule("com.vmware.library.vc.cluster").getComputeResourceOfVm(vm).name + "<br />";
+body += "Snapshot name: " + snapshot.Name + "<br />";
+body += "Snapshot description: " + snapshot.Description + "<br />";
+body += "Snapshot age: " + snapshot.Age + "<br />";
+body += "Snapshot size: " + snapshot.SizeGB + "GB<br />";
+body += "Snapshot created by: " + snapshot.CreatedBy + "<br />";
+body += "Email address to send to: " + email_to + "</P>";
+
+// Get REST Host for the vCenter.
+var rest_host = System.getModule("uk.co.enlow.vc").getRestHostFromvCenterSDK(vm.sdkConnection); 
+if (rest_host != null) {
+	var api_token = token;
+	if (api_token == null || api_token.length == 0) {
+		api_token = System.getModule("uk.co.enlow.tags").getvSphereRestToken(rest_host);
+	}
+	
+	if (api_token != null && api_token.length > 0) {
+		// Get tags.
+		var attached_tags = System.getModule("uk.co.enlow.tags").listRestAttachedTags(rest_host, vm, api_token);
+		if (attached_tags != null && attached_tags.length > 0) {
+			var display_tags = new Array();			
+					
+			for each (var current in attached_tags) {
+				// Get the category name
+				var tag_category = System.getModule("uk.co.enlow.tags").getRestTagCategoryByID(rest_host, api_token, current.category_id); 
+				if (tag_category != null) {
+					//body += tag_category.name + ": " + current.name + "<br />";
+					display_tags.push({ category:tag_category.name, tag:current.name });
+					
+				}		
+			}
+			
+			// Sort the display_tags.
+			display_tags.sort(sort_display_tags);
+			
+			body += "<P>Tags applied to this VM:</P>";
+			
+			body += "<P>";
+			for each (var current in display_tags) {
+				body += current.category + ": " + current.tag + "<br />";
+			}
+			body += "</P>";
+		}
+	}
+}
+
+var fields = vm.sdkConnection.customFieldsManager.field;
+if (fields != null && fields.length > 0) {
+	fields.sort(sort_array_name);
+	
+	body += "<P>Custom Attributes applied to this VM:</P><P>";
+	
+	for each (var current in fields) {
+		if (current.managedObjectType == "VirtualMachine") {
+			var field_value = System.getModule("com.vmware.library.vc.customattribute").getCustomField(vm, current.name);
+			body += current.name + ": " + field_value + "<br />";
+		}
+	}
+	
+	body += "</P>";
+
+	/*body += "<table>";
+	for each (var current in fields) {
+		var line = "<tr><td>" + current.name + "</td><td>" + current.managedObjectType + "</td>";
+		var field_value = System.getModule("com.vmware.library.vc.customattribute").getCustomField(vm, current.name);
+		if (field_value != null && field_value.length > 0) {
+			line += "<td>" + field_value + "</td>";
+		}		
+		body += line + "</tr>";
+	}
+	body += "</table>";*/
+}
+
+body += "</body></html>";
+
+mail.addMimePart(body, "text/html");
+mail.sendMessage();]]></script>
+    <in-binding>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+      <bind name="snapshot" type="CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" export-name="snapshot"/>
+      <bind name="raw_username" type="string" export-name="raw_username"/>
+      <bind name="email_to" type="string" export-name="email_to"/>
+      <bind name="email_subject" type="string" export-name="email_subject"/>
+      <bind name="email_header" type="string" export-name="email_header"/>
+      <bind name="cc_address" type="string" export-name="cc_address"/>
+      <bind name="no_creator" type="boolean" export-name="no_creator"/>
+      <bind name="token" type="string" export-name="token"/>
+    </in-binding>
+    <out-binding/>
+    <position y="246.3181818181818" x="624.5"/>
+  </workflow-item>
+  <workflow-item name="item6" out-name="item7" type="custom-condition" alt-out-name="item9">
+    <display-name><![CDATA[Automatically Delete ?]]></display-name>
+    <script encoded="false"><![CDATA[return (snapshot.Age >= delete_age);]]></script>
+    <in-binding>
+      <bind name="snapshot" type="CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" export-name="snapshot"/>
+      <bind name="delete_age" type="number" export-name="delete_age"/>
+    </in-binding>
+    <position y="109.04545454545453" x="625.0"/>
+  </workflow-item>
+  <workflow-item name="item7" out-name="item10" type="task">
+    <display-name><![CDATA[Remove Snapshot]]></display-name>
+    <script encoded="false"><![CDATA[// Takes an Array of VcVirtualMachineSnapshotTree
+// Returns VcVirtualMachineSnapshot
+function find_snapshot(tree_array, snap_name) {
+	var result = null;
+	
+	for each (var current in tree_array) {
+		if (current.name == snap_name) {
+			result = current.snapshot;
+			break;
+		}
+	
+		result = find_snapshot(current.childSnapshotList, snap_name);
+		if (result != null) {
+			break;
+		}
+	}
+	
+	return result;
+}
+
+// Find the snap.
+var ss = find_snapshot(vm.snapshot.rootSnapshotList, snapshot.Name);
+
+if (ss != null) {
+	System.log("Found snapshot object for " + snapshot.Name);
+	remove_task = ss.removeSnapshot_Task(false, true);
+	
+}
+
+]]></script>
+    <in-binding>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+      <bind name="snapshot" type="CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" export-name="snapshot"/>
+    </in-binding>
+    <out-binding>
+      <bind name="remove_task" type="VC:Task" export-name="remove_task"/>
+    </out-binding>
+    <position y="119.04545454545453" x="764.5"/>
+  </workflow-item>
+  <workflow-item name="item9" out-name="item3" type="task">
+    <display-name><![CDATA[Customise Email]]></display-name>
+    <script encoded="false"><![CDATA[email_subject = "Snapshot information for " + vm.name;
+email_header = "A snapshot has been detected with the following information.</P><P style='font-weight: bold'>It will be automatically deleted in " + (delete_age - Age) + " days.";
+
+snapshot_removed = false;]]></script>
+    <in-binding>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+      <bind name="Age" type="number" export-name="snapshot.Age"/>
+      <bind name="delete_age" type="number" export-name="delete_age"/>
+    </in-binding>
+    <out-binding>
+      <bind name="email_subject" type="string" export-name="email_subject"/>
+      <bind name="email_header" type="string" export-name="email_header"/>
+      <bind name="snapshot_removed" type="boolean" export-name="snapshot_removed"/>
+    </out-binding>
+    <position y="182.68181818181816" x="625.0"/>
+  </workflow-item>
+  <workflow-item name="item10" out-name="item8" type="task" script-module="com.vmware.library.vc.basic/vim3WaitTaskEnd">
+    <display-name><![CDATA[vim3WaitTaskEnd]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.vmware.library.vc.basic").vim3WaitTaskEnd(task,progress,pollRate) ;]]></script>
+    <in-binding>
+      <bind name="task" type="VC:Task" export-name="remove_task">
+        <description><![CDATA[Task to Wait for]]></description>
+      </bind>
+      <bind name="progress" type="boolean" export-name="progress">
+        <description><![CDATA[Log progess while waiting for the task]]></description>
+      </bind>
+      <bind name="pollRate" type="number" export-name="pollRate">
+        <description><![CDATA[Polling rate for the task state [seconds]]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="Any" export-name="task_result"/>
+    </out-binding>
+    <description><![CDATA[Wait for a VC Task to end.
+When task ended, return the task result if any. ]]></description>
+    <position y="182.68181818181816" x="765.0"/>
+  </workflow-item>
+  <workflow-item name="item8" out-name="item3" type="task">
+    <display-name><![CDATA[Customise Email]]></display-name>
+    <script encoded="false"><![CDATA[email_subject = "Snapshot deleted on " + vm.name;
+email_header = "The snapshot listed below has now been deleted.";
+
+System.log(task_result);
+
+snapshot_removed = true;]]></script>
+    <in-binding>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+      <bind name="task_result" type="Any" export-name="task_result"/>
+    </in-binding>
+    <out-binding>
+      <bind name="email_subject" type="string" export-name="email_subject"/>
+      <bind name="email_header" type="string" export-name="email_header"/>
+      <bind name="snapshot_removed" type="boolean" export-name="snapshot_removed"/>
+    </out-binding>
+    <position y="246.3181818181818" x="764.5"/>
+  </workflow-item>
+  <workflow-item name="item11" out-name="item2" type="custom-condition" alt-out-name="item13">
+    <display-name><![CDATA[Warn yet ?]]></display-name>
+    <script encoded="false"><![CDATA[return (Age > warn_age);]]></script>
+    <in-binding>
+      <bind name="Age" type="number" export-name="snapshot.Age"/>
+      <bind name="warn_age" type="number" export-name="warn_age"/>
+    </in-binding>
+    <position y="45.40909090909091" x="344.5"/>
+  </workflow-item>
+  <workflow-item name="item12" type="end" end-mode="0">
+    <position y="172.68181818181816" x="384.5"/>
+  </workflow-item>
+  <workflow-item name="item13" out-name="item12" type="task">
+    <display-name><![CDATA[Scriptable task]]></display-name>
+    <script encoded="false"><![CDATA[snapshot_removed = false;]]></script>
+    <in-binding/>
+    <out-binding>
+      <bind name="snapshot_removed" type="boolean" export-name="snapshot_removed"/>
+    </out-binding>
+    <position y="119.04545454545453" x="345.0"/>
+  </workflow-item>
+  <presentation>
+    <p-param name="vm">
+      <desc><![CDATA[vm]]></desc>
+    </p-param>
+    <p-param name="snapshot">
+      <desc><![CDATA[snapshot]]></desc>
+    </p-param>
+    <p-param name="no_creator_email">
+      <desc><![CDATA[no_creator_email]]></desc>
+    </p-param>
+    <p-param name="warn_age">
+      <desc><![CDATA[Days old to start warning creators]]></desc>
+    </p-param>
+    <p-param name="delete_age">
+      <desc><![CDATA[Days old to automatically delete the snapshot]]></desc>
+    </p-param>
+    <p-param name="cc_address">
+      <desc><![CDATA[cc_address]]></desc>
+    </p-param>
+    <p-param name="token">
+      <desc><![CDATA[token]]></desc>
+    </p-param>
+  </presentation>
+</workflow>

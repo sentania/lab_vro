@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<config-element id="ef59fd95-a03d-4a59-b1d2-19f0d86b9e22" version="0.0.0">
+  <display-name><![CDATA[Sample]]></display-name>
+  <atts>
+    <att name="results_email_to" type="string" read-only="false">
+      <value encoded="n"><![CDATA[email@example.com]]></value>
+      <description><![CDATA[Email address to send results email to]]></description>
+    </att>
+    <att name="results_email_subject" type="string" read-only="false">
+      <value encoded="n"><![CDATA[Snapshots Result]]></value>
+      <description><![CDATA[Subject of results email]]></description>
+    </att>
+    <att name="results_email_send" type="boolean" read-only="false">
+      <value encoded="n"><![CDATA[__NULL__]]></value>
+      <description><![CDATA[Whether to send a results email]]></description>
+    </att>
+    <att name="min_age" type="number" read-only="false">
+      <value encoded="n"><![CDATA[7.0]]></value>
+      <description><![CDATA[Minimum age of a snapshot  tpo appear on the report in days]]></description>
+    </att>
+    <att name="warn_age" type="number" read-only="false">
+      <value encoded="n"><![CDATA[10.0]]></value>
+      <description><![CDATA[Age of a snapshot (in days) for a warning email to be sent]]></description>
+    </att>
+    <att name="delete_age" type="number" read-only="false">
+      <value encoded="n"><![CDATA[14.0]]></value>
+      <description><![CDATA[Age of a snapshot for it to be automatically deleted.]]></description>
+    </att>
+    <att name="do_actions" type="boolean" read-only="false">
+      <value encoded="n"><![CDATA[__NULL__]]></value>
+      <description><![CDATA[Whether to delete snapshots]]></description>
+    </att>
+    <att name="no_creator_email" type="string" read-only="false">
+      <value encoded="n"><![CDATA[dept@example.com]]></value>
+      <description><![CDATA[If a snapshot creator email address cannot be found, emails will be sent to this address.]]></description>
+    </att>
+    <att name="exclusion_tag_name" type="string" read-only="false">
+      <value encoded="n"><![CDATA[No Shapshot Automation]]></value>
+      <description><![CDATA[If a tag with the name is on a VM, the snapshots are not automatically deleted.]]></description>
+    </att>
+    <att name="cc_address" type="string" read-only="false">
+      <value encoded="n"><![CDATA[dept@example.com]]></value>
+      <description><![CDATA[Address to copy all emails to]]></description>
+    </att>
+  </atts>
+</config-element>

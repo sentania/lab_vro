@@ -94,26 +94,7 @@ scheduledTask = workflowToLaunch.schedule(workflowParameters, workflowScheduleDa
         <description>Schedule a workflow and create a task.</description>
         <position y="61.51177010245664" x="697.9369001555482"/>
     </workflow-item>
-    <workflow-item name="item3" out-name="item1" type="link" linked-workflow-id="8D80808080808080808080808080808089808080012318760241416446ce5b52f" comparator="0">
-        <display-name>Notify Engineering Team</display-name>
-        <in-binding>
-            <bind name="smtpHost" type="string" export-name="smtpHost"/>
-            <bind name="smtpPort" type="number" export-name="smtpPort"/>
-            <bind name="username" type="string" export-name=""/>
-            <bind name="password" type="SecureString" export-name=""/>
-            <bind name="fromName" type="string" export-name="fromName"/>
-            <bind name="fromAddress" type="string" export-name="fromAddress"/>
-            <bind name="toAddress" type="string" export-name="toAddress"/>
-            <bind name="subject" type="string" export-name="subject"/>
-            <bind name="content" type="string" export-name="content"/>
-            <bind name="useSsl" type="boolean" export-name="useSsl"/>
-            <bind name="useStartTls" type="boolean" export-name="useStartTls"/>
-        </in-binding>
-        <out-binding/>
-        <description> </description>
-        <position y="61.5" x="298.0"/>
-    </workflow-item>
-    <workflow-item name="item4" out-name="item3" type="task" comparator="0">
+    <workflow-item name="item4" out-name="item1" type="task" comparator="0">
         <display-name>Generate Email Body</display-name>
         <script encoded="false">content = "A new snapshot for VM: " + vm.name  + " has been requested with a description of: " + description + ".  It is scheduled to expire at: " + expirationDate</script>
         <in-binding>

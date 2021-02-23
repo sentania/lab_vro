@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getRestHostFromvCenterSDK" result-type="REST:RESTHost" api-version="6.0.0" id="b4008310-b3fb-4fc0-92ca-38af3e04f1e0" version="0.0.0" allowed-operations="evf" category-name="uk.co.enlow.vc">
+  <param n="sdk" t="VC:SdkConnection"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[var host = null;
+
+if (sdk == null) {
+	throw "Invalid Argument";
+}
+
+function gethostname(url) {
+	var hostname = url.substring(url.indexOf("://") + 3);
+	var port = hostname.indexOf(":");
+	var slash = hostname.indexOf("/");
+	
+	var end = -1;
+	if (port != -1 && slash != -1) {
+		end = (port < slash) ? port : slash;
+		
+	} else if (port == -1 && slash != -1) {
+		end = slash;
+		
+	} else if (port != -1 && slash == -1) {
+		end = port;
+		
+	}
+	
+	hostname = hostname.substring(0, end);
+	return hostname;
+}
+
+var vcenter_hostname = gethostname(sdk.name);
+
+var hosts = RESTHostManager.getHosts();
+for each (var current_host in hosts)
+{
+	var rest_host = RESTHostManager.getHost(current_host);
+	var rest_hostname = gethostname(rest_host.url);
+	
+	if (vcenter_hostname == rest_hostname) {
+		host = rest_host;
+		break;
+	}
+}
+
+return host;]]></script>
+</dunes-script-module>

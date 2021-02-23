@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getRestTagByID" result-type="CompositeType(id:string,name:string,description:string,used_by:Array/string,category_id:string):tag" api-version="6.0.0" id="c0feb518-6e9c-44af-b2f3-39d4bc272091" version="0.0.0" allowed-operations="evf" category-name="uk.co.enlow.tags">
+  <param n="restHost" t="REST:RESTHost"><![CDATA[]]></param>
+  <param n="token" t="string"><![CDATA[]]></param>
+  <param n="tag_id" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[if (restHost == null)
+{
+	throw "There is no REST Host specified.";
+}
+
+if (tag_id == null || tag_id.length == 0)
+{
+	throw "There is no tag ID specified.";
+}
+
+var result = null;
+var request = restHost.createRequest("GET", "/com/vmware/cis/tagging/tag/id:" + tag_id);
+if (token != null)
+{
+	request.setHeader("vmware-api-session-id", token);
+}
+
+var response = request.execute();
+if (response.statusCode == 200)
+{
+	var tag = JSON.parse(response.contentAsString).value;		
+	result = { name:tag.name, id:tag.id, description:tag.description, used_by:tag.used_by, category_id:tag.category_id };	
+}
+else	
+{
+	System.debug(response.statusCode + ":" + response.contentAsString);
+}
+
+return result;]]></script>
+</dunes-script-module>

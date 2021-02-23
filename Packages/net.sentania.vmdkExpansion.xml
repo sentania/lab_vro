@@ -3,6 +3,18 @@
 <elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='4b358a7f-ad9e-4204-8560-06b5efcb7f4b'&dunesName='Workflow']]></elm>
 <elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='b71a387e-6d6a-4fd1-897c-fbca98f0ce1b'&dunesName='Action'&name='extendVMDisk'&category='net.sentania.Actions']]></elm>
 <elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='99afccd7-9fcc-4dc2-82b7-586de690364e'&dunesName='Action'&name='vim3WaitTaskEnd'&category='com.vmware.library.vc.basic']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='670e6050-b232-4b0d-bd4d-02fb0ba5d9fe'&dunesName='Workflow']]></elm>
 <elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='9554e00e-c9bd-4664-b1b1-abd2a74e1aa0'&dunesName='Action'&name='getVMDiskNames'&category='net.sentania.Actions']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='8c5b61f7-2369-461a-b6cb-1bc7bc1fd041'&dunesName='Action'&name='changeVMRAM'&category='com.vmware.library.vc.vm']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='cef73ba3-2c69-4b2a-9180-29edba5bc71f'&dunesName='Action'&name='changeVMvCPU'&category='com.vmware.library.vc.vm']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='960bf519-90d1-4f38-8e9e-9b5bd78fe196'&dunesName='Workflow']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='a34f89cf-9ff1-4263-95a5-4da59ee0864d'&dunesName='Workflow']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='BD80808080808080808080808080808075C280800122528313869552e41805bb1'&dunesName='Workflow']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='6417dffd-de3b-4109-9fbd-d13be0f94869'&dunesName='Action'&name='startVM'&category='com.vmware.library.vc.vm.power']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='354f73b6-88fb-424b-b116-a0bad1994835'&dunesName='Action'&name='shutdownVM'&category='com.vmware.library.vc.vm.power']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='BD808080808080808080808080808080CCC280800122528313869552e41805bb1'&dunesName='Workflow']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='b9242805-c5a6-42d0-b2b4-b759321e086b'&dunesName='Action'&name='vim3WaitToolsStarted'&category='com.vmware.library.vc.vm.tools']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='B8808080808080808080808080808080C480808001231146624761b79546544c2'&dunesName='Workflow']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='6af61b49-421b-4bf7-89db-e2214df751f0'&dunesName='Action'&name='WaitTaskEndOrVMQuestion'&category='com.vmware.library.vc.basic']]></elm>
 <used-plugin name='VC' version='6.5.0' />
 </package>

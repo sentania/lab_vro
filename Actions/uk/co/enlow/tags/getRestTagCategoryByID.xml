@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getRestTagCategoryByID" result-type="CompositeType(id:string,name:string,description:string,used_by:Array/string,cardinality:string,associable_types:Array/string):category" api-version="6.0.0" id="5ec88be0-64bd-4986-95db-709e719822c1" version="0.0.0" allowed-operations="evf" category-name="uk.co.enlow.tags">
+  <param n="restHost" t="REST:RESTHost"><![CDATA[]]></param>
+  <param n="token" t="string"><![CDATA[]]></param>
+  <param n="category_id" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[if (restHost == null)
+{
+	throw "There is no REST Host specified.";
+}
+
+if (category_id == null || category_id.length == 0)
+{
+	throw "There is no category ID specified.";
+}
+
+var result = null;
+var request = restHost.createRequest("GET", "/com/vmware/cis/tagging/category/id:" + category_id);
+if (token != null)
+{
+	request.setHeader("vmware-api-session-id", token);
+}
+
+var response = request.execute();
+if (response.statusCode == 200)
+{
+	var category = JSON.parse(response.contentAsString).value;		
+	result = { name:category.name, id:category.id, description:category.description, cardinality:category.cardinality, associable_types:category.associable_types, used_by:category.used_by };	
+}
+else	
+{
+	System.debug("getRestTagCategory - request for " + category_id + ". Status Code / Response was: " + response.statusCode + " - " + response.contentAsString);
+}
+
+return result;]]></script>
+</dunes-script-module>

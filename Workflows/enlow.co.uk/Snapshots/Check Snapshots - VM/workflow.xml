@@ -1,0 +1,432 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item2" object-name="workflow:name=generic" id="f6249c66-7867-4fc3-992f-2764d34b6dea" version="0.0.3" api-version="6.0.0" allowed-operations="evf" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Check Snapshots - VM]]></display-name>
+  <position y="81.77272727272727" x="205.0"/>
+  <input>
+    <param name="vm" type="VC:VirtualMachine">
+      <description><![CDATA[Virtual Machine]]></description>
+    </param>
+    <param name="min_age" type="number">
+      <description><![CDATA[Minimum age of the snapshot]]></description>
+    </param>
+    <param name="do_actions" type="boolean">
+      <description><![CDATA[Automatic Snapshot Management ?]]></description>
+    </param>
+    <param name="exclusion_tag_name" type="string">
+      <description><![CDATA[Name of the tag that will exclude the VM from having snapshots tidied up]]></description>
+    </param>
+    <param name="no_creator_email" type="string"/>
+    <param name="delete_age" type="number"/>
+    <param name="warn_age" type="number"/>
+    <param name="cc_address" type="string"/>
+  </input>
+  <output>
+    <param name="snapshot_info" type="Array/CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info"/>
+  </output>
+  <attrib name="snapshot_found" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="local_snapshot_info" type="Array/CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="vc" type="VC:SdkConnection" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="rest_host" type="REST:RESTHost" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="attached_tags" type="Array/CompositeType(id:string,name:string,description:string,used_by:Array/string,category_id:string):tag" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="errorCode" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="token" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="current_snapshot_position" type="number" read-only="false">
+    <value encoded="n"><![CDATA[0.0]]></value>
+  </attrib>
+  <attrib name="current_snapshot" type="CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="snapshot_removed" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[false]]></value>
+  </attrib>
+  <workflow-item name="item2" out-name="item0" type="task">
+    <display-name><![CDATA[Get VM Snapshot Info]]></display-name>
+    <script encoded="false"><![CDATA[// 'vm' is the input parameter - the virtual machine object  
+var snapshots = new Array();  
+if (vm.snapshot) {  
+    var snapshotTrees = vm.snapshot.rootSnapshotList;  
+    for (i in snapshotTrees) {  
+        getSnapshotsOfVM(snapshotTrees[i]);  
+    }  
+}  
+
+function convertBytesToGB(size)
+{
+	return System.formatNumber(size/1024/1024/1024, "0.000");
+}
+  
+function getSnapshotsOfVM(tree) {  
+    snapshots.push(tree); // store a tupple of the snapshot and its creation time  
+    var trees = tree.childSnapshotList;  
+    if (trees != null) {  
+        for (index in trees) {  
+            if (trees[index] != null)  
+                getSnapshotsOfVM(trees[index]);  
+        }  
+    }
+}
+
+function getSnapshotSize(current_vm, desired_snapshot) {
+	var result = 0;
+	var vmLayout = current_vm.layoutEx;
+    if (vmLayout != null) {
+		var layoutFiles = {};
+		var totalSize = 0;
+		
+     	for (f in vmLayout.file) { //VcVirtualMachineFileLayoutExFileInfo[]
+       		var file = vmLayout.file[f];
+
+			// This is only accurate for VMs with one snapshot.
+			if (file.name.indexOf(".vmdk") != -1) {
+				totalSize += file.size;
+			}
+			
+	        layoutFiles[file.key] = file;
+     	}
+
+	     var layoutSnapshots = vmLayout.snapshot; // VcVirtualMachineFileLayoutExSnapshotLayout[]
+     	 for(s in layoutSnapshots){
+			var snapshot = VcPlugin.convertToVimManagedObject(current_vm, layoutSnapshots[s].key); // VcVirtualMachineSnapshot
+
+			// We have looped through the snapshots on this VM and now
+			// checking to see if this is the snapshot we want the info on.
+			if (snapshot == desired_snapshot) {
+				var layoutSnapshot = layoutSnapshots[s]; // VcVirtualMachineFileLayoutExSnapshotLayout
+						
+				var snapshot_disk_size = 0;
+       			for (d in layoutSnapshot.disk) {
+	     	    	var disk = layoutSnapshot.disk[d];  // VcVirtualMachineFileLayoutExDiskLayout (chain, key)
+	
+					for each(c in disk.chain) {	// VcVirtualMachineFileLayoutExDiskUnit					
+						for each (fe in c.fileKey) {						
+							// Remove the size of the file that has been snapshotted.
+							// This means the only VMDKs that are left are the snapshot VMDKs (in theory).
+							totalSize -= layoutFiles[fe].size;
+							snapshot_disk_size += layoutFiles[fe].size;
+						}
+					}	
+       			}
+    		    
+				result = convertBytesToGB(totalSize);			
+			}
+		}
+    }
+
+	return result;
+}
+
+local_snapshot_info = null;
+snapshot_info = null;
+
+if (snapshots.length > 0) {
+	local_snapshot_info = new Array();
+	System.log("*****************************");
+	//System.log(vm.name + " has snapshots:");
+  
+	// Print the results  
+	for each (var snap in snapshots) {  
+		// Size
+		var ss_size = getSnapshotSize(snap.vm, snap.snapshot);
+		var creator = "";
+		
+		var spec = new VcEventFilterSpec();
+		spec.entity = new VcEventFilterSpecByEntity();
+		spec.entity.entity = snap.vm;
+		spec.entity.recursion = VcEventFilterSpecRecursionOption.self;
+		
+		// Specify time (1 minute either side of the snapshot event)
+		spec.time = new VcEventFilterSpecByTime();
+		spec.time.beginTime = new Date(snap.createTime.getTime() + (-60 * 1000));
+		spec.time.endTime = new Date(snap.createTime.getTime() + (60 * 1000));
+		
+		var events = snap.vm.sdkConnection.eventManager.queryEvents(spec);	
+		if (events != null) {	
+			for each (var ev in events) {
+				if (ev.info != null && ev.info.descriptionId == "VirtualMachine.createSnapshot") {
+					creator = ev.userName;					
+				}
+			}
+		}
+		
+		//System.log("Snapshot creator for " + snap.name + " is " + creator);
+				
+		// Age
+		var now = new Date();
+		var timeDiff = Math.abs(snap.createTime.getTime() - now.getTime());
+		var diffDays = Math.round(timeDiff / (1000 * 3600 * 24));
+	    System.log("VM " + vm.name + " has snapshot '" + snap.name + "' created on: '" + snap.createTime + "' by " + creator + ", is " + diffDays + " days old and is " + ss_size + " GB.");
+	
+		if (diffDays >= min_age) {	
+			var ss_info = { VMName:vm.name, Name:snap.name, Description:snap.description, Age:diffDays, SizeGB:ss_size, CreatedBy:creator };
+			local_snapshot_info.push(ss_info);
+			snapshot_found = true;
+		}
+	}
+	
+	snapshot_info = local_snapshot_info;
+}
+
+]]></script>
+    <in-binding>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+      <bind name="min_age" type="number" export-name="min_age"/>
+    </in-binding>
+    <out-binding>
+      <bind name="local_snapshot_info" type="Array/CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" export-name="local_snapshot_info"/>
+      <bind name="snapshot_found" type="boolean" export-name="snapshot_found"/>
+      <bind name="snapshot_info" type="Array/CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" export-name="snapshot_info"/>
+    </out-binding>
+    <position y="91.77272727272727" x="304.5"/>
+  </workflow-item>
+  <workflow-item name="item0" out-name="item6" type="condition" alt-out-name="item3" comparator="0">
+    <display-name><![CDATA[Has Snapshots ?]]></display-name>
+    <script encoded="false"><![CDATA[//Generated by the system, cannot be edited
+return (snapshot_found == true) ;]]></script>
+    <in-binding>
+      <bind name="snapshot_found" type="boolean" export-name="snapshot_found"/>
+    </in-binding>
+    <condition name="snapshot_found" type="boolean" comparator="0" label="null">false</condition>
+    <position y="81.77272727272727" x="445.0"/>
+  </workflow-item>
+  <workflow-item name="item3" type="end" end-mode="0">
+    <position y="18.136363636363633" x="485.0"/>
+  </workflow-item>
+  <workflow-item name="item4" out-name="item14" type="condition" alt-out-name="item5" comparator="0">
+    <display-name><![CDATA[Automatic Management ?]]></display-name>
+    <script encoded="false"><![CDATA[//Generated by the system, cannot be edited
+return (do_actions == true) ;]]></script>
+    <in-binding>
+      <bind name="do_actions" type="boolean" export-name="do_actions"/>
+    </in-binding>
+    <condition name="do_actions" type="boolean" comparator="0" label="null">false</condition>
+    <position y="209.04545454545453" x="444.5"/>
+  </workflow-item>
+  <workflow-item name="item5" type="end" end-mode="0">
+    <position y="272.68181818181813" x="485.0"/>
+  </workflow-item>
+  <workflow-item name="item6" out-name="item7" type="task">
+    <display-name><![CDATA[Assign SDK]]></display-name>
+    <script encoded="false"><![CDATA[vc = vm.sdkConnection;]]></script>
+    <in-binding>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+    </in-binding>
+    <out-binding>
+      <bind name="vc" type="VC:SdkConnection" export-name="vc"/>
+    </out-binding>
+    <position y="91.77272727272727" x="584.5"/>
+  </workflow-item>
+  <workflow-item name="item7" out-name="item13" catch-name="item16" throw-bind-name="errorCode" type="task" script-module="uk.co.enlow.vc/getRestHostFromvCenterSDK">
+    <display-name><![CDATA[getRestHostFromvCenterSDK]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("uk.co.enlow.vc").getRestHostFromvCenterSDK(sdk) ;]]></script>
+    <in-binding>
+      <bind name="sdk" type="VC:SdkConnection" export-name="vc"/>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="REST:RESTHost" export-name="rest_host"/>
+    </out-binding>
+    <position y="91.77272727272727" x="724.5"/>
+  </workflow-item>
+  <workflow-item name="item8" out-name="item9" catch-name="item18" throw-bind-name="errorCode" type="task" script-module="uk.co.enlow.tags/listRestAttachedTags">
+    <display-name><![CDATA[listRestAttachedTags]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("uk.co.enlow.tags").listRestAttachedTags(restHost,vc_obj,token) ;]]></script>
+    <in-binding>
+      <bind name="restHost" type="REST:RESTHost" export-name="rest_host"/>
+      <bind name="token" type="string" export-name="token"/>
+      <bind name="vc_obj" type="Any" export-name="vm"/>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="Array/CompositeType(id:string,name:string,description:string,used_by:Array/string,category_id:string):tag" export-name="attached_tags"/>
+    </out-binding>
+    <position y="219.04545454545453" x="724.5"/>
+  </workflow-item>
+  <workflow-item name="item9" out-name="item21" type="custom-condition" alt-out-name="item4">
+    <display-name><![CDATA[Excluded From snapshot management ?]]></display-name>
+    <script encoded="false"><![CDATA[var result = false;
+
+for each (var current in attached_tags)
+{
+	if (current.name == exclusion_tag_name) {
+		System.log("The VM '" + vm.name + "' is excluded from having snapshots managed automatically.");
+		result = true;
+		break;
+	}
+}
+
+return result;]]></script>
+    <in-binding>
+      <bind name="attached_tags" type="Array/CompositeType(id:string,name:string,description:string,used_by:Array/string,category_id:string):tag" export-name="attached_tags"/>
+      <bind name="exclusion_tag_name" type="string" export-name="exclusion_tag_name"/>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+    </in-binding>
+    <position y="209.04545454545453" x="584.5"/>
+  </workflow-item>
+  <workflow-item name="item11" out-name="item19" catch-name="item10" throw-bind-name="errorCode" type="link" linked-workflow-id="32c6c8d2-9b54-417a-b518-aa787794125a">
+    <display-name><![CDATA[Manage Snapshots - VM]]></display-name>
+    <in-binding>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+      <bind name="snapshot" type="CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" export-name="current_snapshot"/>
+      <bind name="no_creator_email" type="string" export-name="no_creator_email"/>
+      <bind name="warn_age" type="number" export-name="warn_age"/>
+      <bind name="delete_age" type="number" export-name="delete_age"/>
+      <bind name="cc_address" type="string" export-name="cc_address"/>
+      <bind name="token" type="string" export-name="token"/>
+    </in-binding>
+    <out-binding>
+      <bind name="snapshot_removed" type="boolean" export-name="snapshot_removed"/>
+    </out-binding>
+    <position y="219.04545454545453" x="24.5"/>
+  </workflow-item>
+  <workflow-item name="item13" out-name="item8" catch-name="item17" throw-bind-name="errorCode" type="task" script-module="uk.co.enlow.tags/getvSphereRestToken">
+    <display-name><![CDATA[getvSphereRestToken]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("uk.co.enlow.tags").getvSphereRestToken(rest_host) ;]]></script>
+    <in-binding>
+      <bind name="rest_host" type="REST:RESTHost" export-name="rest_host"/>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="token"/>
+    </out-binding>
+    <position y="155.4090909090909" x="724.5"/>
+  </workflow-item>
+  <workflow-item name="item14" out-name="item15" type="custom-condition" alt-out-name="item20">
+    <display-name><![CDATA[More Snapshots ?]]></display-name>
+    <script encoded="false"><![CDATA[return (current_snapshot_position < local_snapshot_info.length);]]></script>
+    <in-binding>
+      <bind name="local_snapshot_info" type="Array/CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" export-name="local_snapshot_info"/>
+      <bind name="current_snapshot_position" type="number" export-name="current_snapshot_position"/>
+    </in-binding>
+    <position y="209.04545454545453" x="304.5"/>
+  </workflow-item>
+  <workflow-item name="item15" out-name="item11" type="task">
+    <display-name><![CDATA[Set current snapshot]]></display-name>
+    <script encoded="false"><![CDATA[current_snapshot = local_snapshot_info[current_snapshot_position];]]></script>
+    <in-binding>
+      <bind name="local_snapshot_info" type="Array/CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" export-name="local_snapshot_info"/>
+      <bind name="current_snapshot_position" type="number" export-name="current_snapshot_position"/>
+    </in-binding>
+    <out-binding>
+      <bind name="current_snapshot" type="CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" export-name="current_snapshot"/>
+    </out-binding>
+    <position y="219.04545454545453" x="164.5"/>
+  </workflow-item>
+  <workflow-item name="item10" prototype-id="increase-counter" out-name="item14" content-mode="x" type="task">
+    <display-name><![CDATA[Increase counter]]></display-name>
+    <script encoded="false"><![CDATA[//Auto-generated script
+counter = counter+1;]]></script>
+    <in-binding>
+      <bind name="counter" type="number" export-name="current_snapshot_position">
+        <description><![CDATA[counter to increment]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="counter" type="number" export-name="current_snapshot_position">
+        <description><![CDATA[counter incremented]]></description>
+      </bind>
+    </out-binding>
+    <description><![CDATA[Increment a counter by one]]></description>
+    <position y="282.68181818181813" x="164.5"/>
+  </workflow-item>
+  <workflow-item name="item12" type="end" end-mode="0">
+    <position y="336.3181818181818" x="344.5"/>
+  </workflow-item>
+  <workflow-item name="item16" throw-bind-name="errorCode" type="end" end-mode="1">
+    <position y="81.77272727272727" x="904.5"/>
+  </workflow-item>
+  <workflow-item name="item17" throw-bind-name="errorCode" type="end" end-mode="1">
+    <position y="145.4090909090909" x="904.5"/>
+  </workflow-item>
+  <workflow-item name="item18" throw-bind-name="errorCode" type="end" end-mode="1">
+    <position y="209.04545454545453" x="904.5"/>
+  </workflow-item>
+  <workflow-item name="item19" out-name="item10" type="task">
+    <display-name><![CDATA[Mark as Deleted]]></display-name>
+    <script encoded="false"><![CDATA[// Mark the snapshot as deleted.
+if (snapshot_removed) {
+	local_snapshot_info[current_snapshot_position].Result = "Deleted";
+}]]></script>
+    <in-binding>
+      <bind name="local_snapshot_info" type="Array/CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" export-name="local_snapshot_info"/>
+      <bind name="current_snapshot_position" type="number" export-name="current_snapshot_position"/>
+      <bind name="snapshot_removed" type="boolean" export-name="snapshot_removed"/>
+    </in-binding>
+    <out-binding>
+      <bind name="local_snapshot_info" type="Array/CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" export-name="local_snapshot_info"/>
+    </out-binding>
+    <position y="282.68181818181813" x="24.5"/>
+  </workflow-item>
+  <workflow-item name="item20" out-name="item12" type="task">
+    <display-name><![CDATA[Assign Output var]]></display-name>
+    <script encoded="false"><![CDATA[
+
+
+snapshot_info = local_snapshot_info;]]></script>
+    <in-binding>
+      <bind name="local_snapshot_info" type="Array/CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" export-name="local_snapshot_info"/>
+    </in-binding>
+    <out-binding>
+      <bind name="snapshot_info" type="Array/CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" export-name="snapshot_info"/>
+    </out-binding>
+    <position y="282.68181818181813" x="304.5"/>
+  </workflow-item>
+  <workflow-item name="item21" out-name="item1" type="task">
+    <display-name><![CDATA[Log Exemption]]></display-name>
+    <script encoded="false"><![CDATA[for (var i = 0; i < local_snapshot_info.length; i++) {
+	local_snapshot_info[i].Result = "Exempt from Automation";
+}
+
+snapshot_info = local_snapshot_info;]]></script>
+    <in-binding>
+      <bind name="local_snapshot_info" type="Array/CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" export-name="local_snapshot_info"/>
+    </in-binding>
+    <out-binding>
+      <bind name="snapshot_info" type="Array/CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" export-name="snapshot_info"/>
+    </out-binding>
+    <position y="155.4090909090909" x="585.0"/>
+  </workflow-item>
+  <workflow-item name="item1" type="end" end-mode="0">
+    <position y="145.4090909090909" x="484.5"/>
+  </workflow-item>
+  <presentation>
+    <p-param name="vm">
+      <desc><![CDATA[vm]]></desc>
+    </p-param>
+    <p-param name="min_age">
+      <desc><![CDATA[min_age]]></desc>
+    </p-param>
+    <p-param name="exclusion_tag_name">
+      <desc><![CDATA[Name of the tag that will exclude the VM from having snapshots tidied up]]></desc>
+    </p-param>
+    <p-param name="do_actions">
+      <desc><![CDATA[Automatic Snapshot Management ?]]></desc>
+    </p-param>
+    <p-param name="no_creator_email">
+      <desc><![CDATA[no_creator_email]]></desc>
+      <p-qual kind="static" name="defaultValue" type="string"><![CDATA[neale.lonslow@bankofengland.co.uk]]></p-qual>
+    </p-param>
+    <p-param name="delete_age">
+      <desc><![CDATA[delete_age]]></desc>
+    </p-param>
+    <p-param name="warn_age">
+      <desc><![CDATA[warn_age]]></desc>
+    </p-param>
+    <p-param name="cc_address">
+      <desc><![CDATA[cc_address]]></desc>
+    </p-param>
+  </presentation>
+</workflow>

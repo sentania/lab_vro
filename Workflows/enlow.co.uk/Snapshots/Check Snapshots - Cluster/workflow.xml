@@ -1,0 +1,199 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item11" object-name="workflow:name=generic" id="8bc83379-1992-4dd4-bbb3-54bbeeb15688" version="0.0.1" api-version="6.0.0" allowed-operations="evf" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Check Snapshots - Cluster]]></display-name>
+  <position y="45.40909090909091" x="105.0"/>
+  <input>
+    <param name="cluster" type="VC:ClusterComputeResource"/>
+    <param name="min_age" type="number"/>
+    <param name="no_creator_email" type="string"/>
+    <param name="exclusion_tag_name" type="string"/>
+    <param name="do_actions" type="boolean"/>
+    <param name="warn_age" type="number"/>
+    <param name="delete_age" type="number"/>
+    <param name="cc_address" type="string"/>
+  </input>
+  <output>
+    <param name="ClusterSnapshots" type="Array/CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info"/>
+  </output>
+  <attrib name="all_vms" type="Array/VC:VirtualMachine" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="errorCode" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="current_vm" type="VC:VirtualMachine" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="all_vms_current_position" type="number" read-only="false">
+    <value encoded="n"><![CDATA[0.0]]></value>
+  </attrib>
+  <attrib name="vm_snapshot_info" type="Array/CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="cluster_snapshot_info" type="Array/CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <workflow-item name="item1" out-name="item2" catch-name="item8" throw-bind-name="errorCode" type="task" script-module="com.vmware.library.vc.cluster/getAllVMsOfCluster">
+    <display-name><![CDATA[getAllVMsOfCluster]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.vmware.library.vc.cluster").getAllVMsOfCluster(cluster) ;]]></script>
+    <in-binding>
+      <bind name="cluster" type="VC:ClusterComputeResource" export-name="cluster"/>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="Array/VC:VirtualMachine" export-name="all_vms"/>
+    </out-binding>
+    <description><![CDATA[Get all VMs in a cluster]]></description>
+    <position y="119.04545454545453" x="204.5"/>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item6" catch-name="item9" throw-bind-name="errorCode" type="task" script-module="uk.co.enlow.vm/sortVirtualMachineArrayByName">
+    <display-name><![CDATA[sortVirtualMachineArrayByName]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("uk.co.enlow.vm").sortVirtualMachineArrayByName(vm_array) ;]]></script>
+    <in-binding>
+      <bind name="vm_array" type="Array/VC:VirtualMachine" export-name="all_vms"/>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="Array/VC:VirtualMachine" export-name="all_vms"/>
+    </out-binding>
+    <position y="119.04545454545453" x="365.0"/>
+  </workflow-item>
+  <workflow-item name="item3" out-name="item4" type="task">
+    <display-name><![CDATA[Set Current VM]]></display-name>
+    <script encoded="false"><![CDATA[current_vm = all_vms[all_vms_current_position];
+//System.log("Looking for snapshots on VM " + current_vm.name);]]></script>
+    <in-binding>
+      <bind name="all_vms" type="Array/VC:VirtualMachine" export-name="all_vms"/>
+      <bind name="all_vms_current_position" type="number" export-name="all_vms_current_position"/>
+    </in-binding>
+    <out-binding>
+      <bind name="current_vm" type="VC:VirtualMachine" export-name="current_vm"/>
+    </out-binding>
+    <position y="55.40909090909091" x="504.5"/>
+  </workflow-item>
+  <workflow-item name="item4" out-name="item10" catch-name="item0" throw-bind-name="errorCode" type="link" linked-workflow-id="f6249c66-7867-4fc3-992f-2764d34b6dea">
+    <display-name><![CDATA[Check Snapshots - VM]]></display-name>
+    <in-binding>
+      <bind name="vm" type="VC:VirtualMachine" export-name="current_vm"/>
+      <bind name="min_age" type="number" export-name="min_age"/>
+      <bind name="no_creator_email" type="string" export-name="no_creator_email"/>
+      <bind name="do_actions" type="boolean" export-name="do_actions"/>
+      <bind name="exclusion_tag_name" type="string" export-name="exclusion_tag_name"/>
+      <bind name="warn_age" type="number" export-name="warn_age"/>
+      <bind name="delete_age" type="number" export-name="delete_age"/>
+      <bind name="cc_address" type="string" export-name="cc_address"/>
+    </in-binding>
+    <out-binding>
+      <bind name="snapshot_info" type="Array/CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" export-name="vm_snapshot_info"/>
+    </out-binding>
+    <position y="55.40909090909091" x="644.5"/>
+  </workflow-item>
+  <workflow-item name="item5" prototype-id="increase-counter" out-name="item6" content-mode="x" type="task">
+    <display-name><![CDATA[Increase counter]]></display-name>
+    <script encoded="false"><![CDATA[//Auto-generated script
+counter = counter+1;]]></script>
+    <in-binding>
+      <bind name="counter" type="number" export-name="all_vms_current_position">
+        <description><![CDATA[counter to increment]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="counter" type="number" export-name="all_vms_current_position">
+        <description><![CDATA[counter incremented]]></description>
+      </bind>
+    </out-binding>
+    <description><![CDATA[Increment a counter by one]]></description>
+    <position y="191.77272727272725" x="645.0"/>
+  </workflow-item>
+  <workflow-item name="item0" out-name="item5" type="task">
+    <display-name><![CDATA[Log Error]]></display-name>
+    <script encoded="false"><![CDATA[System.log("Error with VM " + current_vm.name + ": " + errorCode);]]></script>
+    <in-binding>
+      <bind name="errorCode" type="string" export-name="errorCode"/>
+      <bind name="current_vm" type="VC:VirtualMachine" export-name="current_vm"/>
+    </in-binding>
+    <out-binding/>
+    <position y="119.04545454545453" x="784.5"/>
+  </workflow-item>
+  <workflow-item name="item6" out-name="item3" type="custom-condition" alt-out-name="item12">
+    <display-name><![CDATA[Any more VMs ?]]></display-name>
+    <script encoded="false"><![CDATA[return (all_vms_current_position < all_vms.length);]]></script>
+    <in-binding>
+      <bind name="all_vms" type="Array/VC:VirtualMachine" export-name="all_vms"/>
+      <bind name="all_vms_current_position" type="number" export-name="all_vms_current_position"/>
+    </in-binding>
+    <position y="109.04545454545453" x="504.5"/>
+  </workflow-item>
+  <workflow-item name="item7" type="end" end-mode="0">
+    <position y="263.59090909090907" x="544.5"/>
+  </workflow-item>
+  <workflow-item name="item8" throw-bind-name="errorCode" type="end" end-mode="1">
+    <position y="190.86363636363635" x="245.0"/>
+  </workflow-item>
+  <workflow-item name="item9" throw-bind-name="errorCode" type="end" end-mode="1">
+    <position y="190.86363636363635" x="405.0"/>
+  </workflow-item>
+  <workflow-item name="item10" out-name="item5" type="task">
+    <display-name><![CDATA[Log Results]]></display-name>
+    <script encoded="false"><![CDATA[// Put together a list of all VMs with Snapshots and their info.
+if (vm_snapshot_info != null && vm_snapshot_info.length > 0)
+	cluster_snapshot_info = cluster_snapshot_info.concat(vm_snapshot_info);]]></script>
+    <in-binding>
+      <bind name="vm_snapshot_info" type="Array/CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" export-name="vm_snapshot_info"/>
+      <bind name="cluster_snapshot_info" type="Array/CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" export-name="cluster_snapshot_info"/>
+    </in-binding>
+    <out-binding>
+      <bind name="cluster_snapshot_info" type="Array/CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" export-name="cluster_snapshot_info"/>
+    </out-binding>
+    <position y="119.04545454545453" x="645.0"/>
+  </workflow-item>
+  <workflow-item name="item11" out-name="item1" type="task">
+    <display-name><![CDATA[Scriptable task]]></display-name>
+    <script encoded="false"><![CDATA[cluster_snapshot_info = new Array();]]></script>
+    <in-binding/>
+    <out-binding>
+      <bind name="cluster_snapshot_info" type="Array/CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" export-name="cluster_snapshot_info"/>
+    </out-binding>
+    <position y="119.04545454545453" x="64.5"/>
+  </workflow-item>
+  <workflow-item name="item12" out-name="item7" type="task">
+    <display-name><![CDATA[Scriptable task]]></display-name>
+    <script encoded="false"><![CDATA[if (cluster_snapshot_info.length > 0)
+	ClusterSnapshots = cluster_snapshot_info;
+else
+	ClusterSnapshots = null;]]></script>
+    <in-binding>
+      <bind name="cluster_snapshot_info" type="Array/CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" export-name="cluster_snapshot_info"/>
+    </in-binding>
+    <out-binding>
+      <bind name="ClusterSnapshots" type="Array/CompositeType(VMName:string,Name:string,Description:string,Age:number,SizeGB:number,CreatedBy:string,Result:string):boe_vm_snapshot_info" export-name="ClusterSnapshots"/>
+    </out-binding>
+    <position y="191.77272727272725" x="505.0"/>
+  </workflow-item>
+  <presentation>
+    <p-param name="cluster">
+      <desc><![CDATA[cluster]]></desc>
+    </p-param>
+    <p-param name="min_age">
+      <desc><![CDATA[min_age]]></desc>
+    </p-param>
+    <p-param name="no_creator_email">
+      <desc><![CDATA[no_creator_email]]></desc>
+    </p-param>
+    <p-param name="exclusion_tag_name">
+      <desc><![CDATA[exclusion_tag_name]]></desc>
+    </p-param>
+    <p-param name="do_actions">
+      <desc><![CDATA[do_actions]]></desc>
+    </p-param>
+    <p-param name="warn_age">
+      <desc><![CDATA[warn_age]]></desc>
+    </p-param>
+    <p-param name="delete_age">
+      <desc><![CDATA[delete_age]]></desc>
+    </p-param>
+    <p-param name="cc_address">
+      <desc><![CDATA[cc_address]]></desc>
+    </p-param>
+  </presentation>
+</workflow>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<package>
+<description><![CDATA[]]></description>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='9d9e6f4c-9d47-4847-8c53-c64267fbf2f8'&dunesName='Action'&name='sortVirtualMachineArrayByName'&category='uk.co.enlow.vm']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='6b9cc2ce-015b-4432-8850-989b2ddab336'&dunesName='Action'&name='getComputeResourceOfVm'&category='com.vmware.library.vc.cluster']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='2511dd37-749d-4a37-a17f-e79b4ddaf00a'&dunesName='Action'&name='getvSphereRestToken'&category='uk.co.enlow.tags']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='4cd21a06-0282-48f7-bead-d22e406c13a7'&dunesName='Action'&name='getEmailAddressForUser'&category='uk.co.enlow.ad']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='b74898e7-e178-41e1-97d2-d38ae55e4f42'&dunesName='Action'&name='getAllVMsOfCluster'&category='com.vmware.library.vc.cluster']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='99afccd7-9fcc-4dc2-82b7-586de690364e'&dunesName='Action'&name='vim3WaitTaskEnd'&category='com.vmware.library.vc.basic']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='8bc83379-1992-4dd4-bbb3-54bbeeb15688'&dunesName='Workflow']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='b4008310-b3fb-4fc0-92ca-38af3e04f1e0'&dunesName='Action'&name='getRestHostFromvCenterSDK'&category='uk.co.enlow.vc']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='c0feb518-6e9c-44af-b2f3-39d4bc272091'&dunesName='Action'&name='getRestTagByID'&category='uk.co.enlow.tags']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='b2cb261b-481c-4485-95e4-d6ea6db16627'&dunesName='Workflow']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='32c6c8d2-9b54-417a-b518-aa787794125a'&dunesName='Workflow']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='5ec88be0-64bd-4986-95db-709e719822c1'&dunesName='Action'&name='getRestTagCategoryByID'&category='uk.co.enlow.tags']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='76c221bf-504c-46de-a5f0-457210ccd57d'&dunesName='Workflow']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='b56dcfd6-06eb-4a2f-b8f0-200dccfed5c6'&dunesName='Action'&name='listRestAttachedTags'&category='uk.co.enlow.tags']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='161f0f3b-a005-4146-a18e-40c68006204a'&dunesName='Action'&name='getCustomField'&category='com.vmware.library.vc.customattribute']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='9dd84601-de41-4307-b7db-3fd4a2645328'&dunesName='Workflow']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='f6249c66-7867-4fc3-992f-2764d34b6dea'&dunesName='Workflow']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='878ef43b-a516-4c17-b0b6-9c3d9db372ae'&dunesName='Action'&name='getFQDNFromURL'&category='uk.co.enlow.util']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/ConfigurationElement?id='ef59fd95-a03d-4a59-b1d2-19f0d86b9e22'&dunesName='ConfigurationElement']]></elm>
+<used-plugin name='VC' version='6.5.0' />
+</package>

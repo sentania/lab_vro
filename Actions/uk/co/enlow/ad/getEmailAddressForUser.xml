@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getEmailAddressForUser" result-type="string" api-version="6.0.0" id="4cd21a06-0282-48f7-bead-d22e406c13a7" version="0.0.0" allowed-operations="evf" category-name="uk.co.enlow.ad">
+  <param n="userName" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[var result = "";
+
+var dcs = AD_HostManager.findAllHosts();
+if (dcs.length > 0) {
+	var users = ActiveDirectory.search("User", userName, dcs[0]);
+	if (users.length == 1) {
+		result = users[0].getAttribute("mail");
+		if (result != "") {
+			System.log("Found email address '" + result + "' for user " + userName);
+			
+		} else {
+			throw "The mail attribute is empty for the user.";
+		
+		}
+		
+	} else if (users.length == 0) {
+		throw "User '" + userName + "' not found.";
+		
+	} else {
+		throw "Multiple results found for user " + userName;
+		
+	}
+	
+} else {
+	throw "There are no Domain Controllers configured.";
+	
+}
+
+return result;]]></script>
+</dunes-script-module>

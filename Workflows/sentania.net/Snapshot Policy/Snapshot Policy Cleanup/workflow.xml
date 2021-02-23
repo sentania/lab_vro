@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:workflow xmlns:ns2="http://vmware.com/vco/workflow" root-name="item1" object-name="workflow:name=generic" id="ff9058d1-8bd1-4ce9-a2fc-2265aaec21a0" editor-version="2.0" version="0.0.0" api-version="6.0.0" restartMode="1" resumeFromFailedMode="0">
+    <display-name>Snapshot Policy Cleanup</display-name>
+    <position y="50.0" x="180.0"/>
+    <input>
+        <param name="vm" type="VC:VirtualMachine"/>
+    </input>
+    <output/>
+    <attrib name="vmSnapShots" type="Array/VC:VirtualMachineSnapshot">
+        <value encoded="n">[]</value>
+    </attrib>
+    <attrib name="numberOfDay" type="number">
+        <value encoded="n"/>
+    </attrib>
+    <attrib name="snapShotCount" type="number">
+        <value encoded="n"/>
+    </attrib>
+    <attrib name="currentSnapshot" type="number">
+        <value encoded="n"/>
+    </attrib>
+    <attrib name="activeSnapshot" type="VC:VirtualMachineSnapshot">
+        <value encoded="n"/>
+    </attrib>
+    <workflow-item name="item1" out-name="item2" type="task" comparator="0">
+        <display-name>Log Info</display-name>
+        <script encoded="false">System.log("=======Beginning Snapshot Policy CLeanup=======");&#13;
+//Look at the VM object passed in, and extract the name of it.&#13;
+&#13;
+//we will pass this to the scale action to look up the deployment and perform out logic&#13;
+&#13;
+var vmname = vm.name;&#13;
+&#13;
+System.log('Impacted VM name: ' + vmname);&#13;
+&#13;
+&#13;
+&#13;
+</script>
+        <in-binding/>
+        <out-binding/>
+        <description>Simple task with custom script capability.</description>
+        <position y="60.0" x="230.0"/>
+    </workflow-item>
+    <workflow-item name="item2" out-name="item4" type="task" script-module="com.vmware.library.vc.vm.snapshot/getAllSnapshotsOfVM" comparator="0">
+        <display-name>getAllSnapshotsOfVM</display-name>
+        <script encoded="false">//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.vmware.library.vc.vm.snapshot").getAllSnapshotsOfVM(vm);
+</script>
+        <in-binding>
+            <bind name="vm" type="VC:VirtualMachine" export-name="vm">
+                <description></description>
+            </bind>
+        </in-binding>
+        <out-binding>
+            <bind name="actionResult" type="Array/VC:VirtualMachineSnapshot" export-name="vmSnapShots"/>
+        </out-binding>
+        <description>Add a note to the workflow schema.</description>
+        <position y="60.0" x="360.0"/>
+    </workflow-item>
+    <workflow-item name="item3" type="end" end-mode="0" comparator="0">
+        <in-binding/>
+        <out-binding/>
+        <position y="150.0" x="500.0"/>
+    </workflow-item>
+    <workflow-item name="item4" out-name="item6" alt-out-name="item5" type="custom-condition" comparator="0">
+        <display-name>Have snapshots?</display-name>
+        <script encoded="false">return vmSnapShots.length&gt;0;</script>
+        <in-binding>
+            <bind name="vmSnapShots" type="Array/VC:VirtualMachineSnapshot" export-name="vmSnapShots"/>
+        </in-binding>
+        <out-binding/>
+        <description>Custom decision based on a custom script.</description>
+        <position y="50.0" x="460.0"/>
+    </workflow-item>
+    <workflow-item name="item5" out-name="item3" type="task" comparator="0">
+        <display-name>No Snapshots</display-name>
+        <script encoded="false">System.log("There is no snapshot older than " + numberOfDay + " day(s)");</script>
+        <in-binding>
+            <bind name="numberOfDay" type="number" export-name="numberOfDay"/>
+        </in-binding>
+        <out-binding/>
+        <description>Simple task with custom script capability.</description>
+        <position y="110.0" x="460.0"/>
+    </workflow-item>
+    <workflow-item name="item6" out-name="item8" type="task" comparator="0">
+        <display-name>Initialize Cleanup</display-name>
+        <script encoded="false">snapShotCount = vmSnapShots.length;&#13;
+currentSnapshot = 0;</script>
+        <in-binding>
+            <bind name="vmSnapShots" type="Array/VC:VirtualMachineSnapshot" export-name="vmSnapShots"/>
+        </in-binding>
+        <out-binding>
+            <bind name="snapShotCount" type="number" export-name="snapShotCount"/>
+            <bind name="currentSnapshot" type="number" export-name="currentSnapshot"/>
+        </out-binding>
+        <description>Simple task with custom script capability.</description>
+        <position y="60.0" x="570.0"/>
+    </workflow-item>
+    <workflow-item name="item7" type="end" end-mode="0" comparator="0">
+        <in-binding/>
+        <out-binding/>
+        <position y="230.0" x="740.0"/>
+    </workflow-item>
+    <workflow-item name="item8" out-name="item10" alt-out-name="item7" type="custom-condition" comparator="0">
+        <display-name>Snapshots to process</display-name>
+        <script encoded="false">if(vmSnapShots.length&gt;0){&#13;
+	return true;&#13;
+}else{&#13;
+	return false;&#13;
+}</script>
+        <in-binding>
+            <bind name="vmSnapShots" type="Array/VC:VirtualMachineSnapshot" export-name="vmSnapShots"/>
+        </in-binding>
+        <out-binding/>
+        <description>Custom decision based on a custom script.</description>
+        <position y="230.0" x="560.0"/>
+    </workflow-item>
+    <workflow-item name="item9" type="end" end-mode="0" comparator="0">
+        <in-binding/>
+        <out-binding/>
+        <position y="300.0" x="440.0"/>
+    </workflow-item>
+    <workflow-item name="item10" out-name="item11" alt-out-name="item9" type="custom-condition" comparator="0">
+        <display-name>Snapshots Remaining</display-name>
+        <script encoded="false">if (currentSnapshot &lt; snapshotCount){&#13;
+	return true;&#13;
+}else{&#13;
+	return false;&#13;
+}</script>
+        <in-binding>
+            <bind name="currentSnapshot" type="number" export-name="currentSnapshot"/>
+            <bind name="snapShotCount" type="number" export-name="snapShotCount"/>
+        </in-binding>
+        <out-binding/>
+        <description>Custom decision based on a custom script.</description>
+        <position y="230.0" x="400.0"/>
+    </workflow-item>
+    <workflow-item name="item11" out-name="item12" type="task" comparator="0">
+        <display-name>Set active snapshot</display-name>
+        <script encoded="false">// Set our activeVM object:&#13;
+var activeSnapshot = vmSnapShots[currentSnapshot];&#13;
+</script>
+        <in-binding>
+            <bind name="currentSnapshot" type="number" export-name="currentSnapshot"/>
+            <bind name="vmSnapShots" type="Array/VC:VirtualMachineSnapshot" export-name="vmSnapShots"/>
+        </in-binding>
+        <out-binding>
+            <bind name="activeSnapshot" type="VC:VirtualMachineSnapshot" export-name="activeSnapshot"/>
+        </out-binding>
+        <description>Simple task with custom script capability.</description>
+        <position y="240.0" x="220.0"/>
+    </workflow-item>
+    <workflow-item name="item12" out-name="item13" type="task" comparator="0">
+        <display-name>Remove snapshot</display-name>
+        <script encoded="false">var logtext;&#13;
+if(activeSnapshot.config){&#13;
+	var vmName = activeSnapshot.config.name;&#13;
+	var snapshotID = activeSnapshot.id;&#13;
+&#13;
+	var task = activeSnapshot.removeSnapshot_Task(removeChildren);&#13;
+	var actionResult = System.getModule("com.vmware.library.vc.basic").vim3WaitTaskEnd(task) ;&#13;
+&#13;
+	logtext = "The snapshot with the id " + snapshotID + " from the Virtual machine '"+vmName+"'has been removed.";&#13;
+}else{&#13;
+	logtext = "The snapshot with the id " + activeSnapshot.id + " has already been removed.";&#13;
+}&#13;
+&#13;
+content = content + "&lt;br&gt;" + logtext;&#13;
+System.log(logtext);&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+</script>
+        <in-binding>
+            <bind name="activeSnapshot" type="VC:VirtualMachineSnapshot" export-name="activeSnapshot"/>
+        </in-binding>
+        <out-binding/>
+        <description>Simple task with custom script capability.</description>
+        <position y="240.0" x="80.0"/>
+    </workflow-item>
+    <workflow-item name="item13" out-name="item10" type="task" comparator="0">
+        <display-name>Set active snapshot count</display-name>
+        <script encoded="false">// Set our activeVM object:&#13;
+var activeSnapshot = vmSnapShots[currentSnapshot];&#13;
+</script>
+        <in-binding>
+            <bind name="activeSnapshot" type="VC:VirtualMachineSnapshot" export-name="activeSnapshot"/>
+            <bind name="currentSnapshot" type="number" export-name="currentSnapshot"/>
+            <bind name="vmSnapShots" type="Array/VC:VirtualMachineSnapshot" export-name="vmSnapShots"/>
+        </in-binding>
+        <out-binding/>
+        <description>Simple task with custom script capability.</description>
+        <position y="150.0" x="220.0"/>
+    </workflow-item>
+    <presentation/>
+</ns2:workflow>

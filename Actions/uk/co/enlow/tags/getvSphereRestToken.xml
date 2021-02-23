@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getvSphereRestToken" result-type="string" api-version="6.0.0" id="2511dd37-749d-4a37-a17f-e79b4ddaf00a" version="0.0.0" allowed-operations="evf" category-name="uk.co.enlow.tags">
+  <param n="rest_host" t="REST:RESTHost"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[if (rest_host == null)
+{
+	throw "Host is null.";
+}
+
+var result = "";
+
+var request = rest_host.createRequest("POST", "/com/vmware/cis/session");
+//request.setHeader("Cookie", "vmware-api-session-id");
+
+var response = request.execute();
+if (response.statusCode != 200)
+{
+	throw "Status Code = " + response.statusCode + " - " + response.contentAsString;
+}
+
+result = JSON.parse(response.contentAsString).value;
+System.log("Token is " + result);
+return result;]]></script>
+</dunes-script-module>
