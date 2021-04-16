@@ -1,0 +1,1 @@
+{"schema":{"deploymentID":{"id":"deploymentID","type":{"dataType":"string"},"label":"deploymentID","constraints":{"required":false}}},"layout":{"pages":[{"id":"page_rxdc982u","title":"General","sections":[{"id":"section_03o043rd","fields":[{"id":"deploymentID","display":"textField","signpostPosition":"right-middle","state":{"visible":true,"read-only":false}}]}]}]},"itemId":""}

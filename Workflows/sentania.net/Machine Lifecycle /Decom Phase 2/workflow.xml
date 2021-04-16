@@ -1,9 +1,63 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item0" object-name="workflow:name=generic" id="755e9c42-dfdd-4e57-9b61-6b7555b4cbae" version="0.0.0" api-version="6.0.0" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
-  <display-name><![CDATA[Decom Phase 2]]></display-name>
-  <position y="50.0" x="100.0"/>
-  <workflow-item name="item0" type="end" end-mode="0">
-    <position y="50.0" x="240.0"/>
-  </workflow-item>
-  <presentation/>
-</workflow>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:workflow xmlns:ns2="http://vmware.com/vco/workflow" root-name="item1" object-name="workflow:name=generic" id="755e9c42-dfdd-4e57-9b61-6b7555b4cbae" editor-version="2.0" version="0.0.1" api-version="6.0.0" restartMode="1" resumeFromFailedMode="0">
+    <display-name>Decom Phase 2</display-name>
+    <position y="50.0" x="100.0"/>
+    <input>
+        <param name="deploymentID" type="string"/>
+    </input>
+    <output/>
+    <workflow-item name="item0" type="end" end-mode="0" comparator="0">
+        <in-binding/>
+        <out-binding/>
+        <position y="50.0" x="380.0"/>
+    </workflow-item>
+    <workflow-item name="item1" out-name="item0" type="task" comparator="0">
+        <display-name>Scriptable task</display-name>
+        <runtime>powercli:12-powershell-7.0</runtime>
+        <script encoded="false">
+function Handler($context, $inputs) {
+ 
+  $token = $context.GetToken()
+ 
+  $deploymentID = $inputs.deploymentID
+  $vRAUrl = "https://vra8.lab.sentania.net"
+  $deploymentURL = $vRAUrl + "/deployment/api/deployments/" + $deploymentID
+
+  ####perform the scale out
+Write-host "vRA URL is: $vRAUrl"
+Write-host "Alerted VM is: $vmname"
+
+    $body = [pscustomobject]@{
+                    
+    "actionId"="Deployment.Delete"
+    "reason"="CPU demand increased"
+                    
+    }
+
+$jsonBody = $body| ConvertTo-Json
+
+$updaterequestURL = $deploymentURL + "/requests"
+#Patch the deployment with the new parameter set
+
+                    $header = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
+
+                    $accept = "application/json"
+                    $contentType = "application/json"
+
+
+                    $header.add("Accept", $accept)
+                    $header.add("Content-Type", $contentType)
+
+                    $header.Add('Authorization', "Bearer $token")
+$updateRequestResult = Invoke-RestMethod -Method POST -uri $updaterequestURL -Headers $header -Body $jsonBody -skipcertificatecheck
+
+}</script>
+        <in-binding>
+            <bind name="deploymentID" type="string" export-name="deploymentID"/>
+        </in-binding>
+        <out-binding/>
+        <description>Simple task with custom script capability.</description>
+        <position y="60.0" x="160.0"/>
+    </workflow-item>
+    <presentation/>
+</ns2:workflow>
